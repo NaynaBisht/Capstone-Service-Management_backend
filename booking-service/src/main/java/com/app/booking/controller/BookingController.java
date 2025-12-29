@@ -57,4 +57,12 @@ public class BookingController {
 
 		return ResponseEntity.ok(bookings);
 	}
+
+	@GetMapping("/history")
+	public ResponseEntity<List<BookingListResponse>> getBookingHistory() {
+
+		List<BookingListResponse> history = bookingService.getBookingHistory();
+
+		return ResponseEntity.ok(history);
+	}
 }

@@ -114,4 +114,24 @@ public class BookingService {
                     )
                     .toList();
         }
+        public List<BookingListResponse> getBookingHistory() {
+
+            List<Booking> bookings =
+                    bookingRepository.findAllByOrderByCreatedAtDesc();
+
+            return bookings.stream()
+                    .map(booking -> BookingListResponse.builder()
+                            .bookingId(booking.getBookingId())
+                            .customerId(booking.getCustomerId())
+                            .serviceName(booking.getServiceName())
+                            .categoryName(booking.getCategoryName())
+                            .scheduledDate(booking.getScheduledDate())
+                            .timeSlot(booking.getTimeSlot())
+                            .address(booking.getAddress())
+                            .status(booking.getStatus().name())
+                            .createdAt(booking.getCreatedAt())
+                            .build()
+                    )
+                    .toList();
+        }
 }
