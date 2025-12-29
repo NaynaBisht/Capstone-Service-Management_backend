@@ -134,4 +134,43 @@ public class BookingService {
                     )
                     .toList();
         }
+
+        public RescheduleBookingResponse rescheduleBooking(String bookingId, RescheduleBookingRequest request) {
+
+            Booking booking = bookingRepository.findByBookingId(bookingId)
+                    .orElseThrow(() ->
+                            new BookingNotFoundException(bookingId)
+                    );
+
+            // check if booking is cancelled
+            if (booking.getStatus() == BookingStatus.CANCELLED) {
+            	throw new BusinessValidationException(
+                        "Cancelled booking cannot be rescheduled");
+//                return RescheduleBookingResponse.builder()
+//                        .bookingId(bookingId)
+//                        .status("CANCELLED")
+//                        .message("Cancelled booking cannot be rescheduled")
+//                        .build();
+            }
+
+            LocalTime newStartTime = parseStartTime(request.getTimeSlot());
+            LocalDateTime newDateTime =
+                    LocalDateTime.of(request.getScheduledDate(), newStartTime);
+
+            if (newDateTime.isBefore(LocalDateTime.now())) {
+                throw new BusinessValidationException(
+                        "Cannot reschedule to past date or time");
+            }
+            
+            booking.setScheduledDate(request.getScheduledDate());
+            booking.setTimeSlot(request.getTimeSlot());
+            
+            bookingRepository.save(booking);
+
+            return RescheduleBookingResponse.builder()
+                    .bookingId(bookingId)
+                    .status(booking.getStatus().name())
+                    .message("Booking has been rescheduled")
+                    .build();
+        }
 }
