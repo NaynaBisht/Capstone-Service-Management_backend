@@ -12,8 +12,8 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.Instant;
 
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,20 +38,19 @@ public class AuthController {
     }
     
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
-
-	    	if (authentication == null) {
-	            return ResponseEntity.status(401).body("Unauthorized");
-	    }
-	    	
-        String userId = authentication.name();
+    public ResponseEntity<?> getCurrentUser(
+            @AuthenticationPrincipal String userId
+    ) {
+        if (userId == null) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         return ResponseEntity.ok(user);
     }
-
+    
     @PostMapping("/create-manager")
     public ResponseEntity<?> createServiceManager(
             @Valid @RequestBody RegisterRequest request
