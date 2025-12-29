@@ -73,4 +73,25 @@ public class BookingService {
                                                 .build())
                                 .toList();
         }
+
+        public BookingDetailsResponse getBookingByBookingId(String bookingId) {
+
+                Booking booking = bookingRepository.findByBookingId(bookingId)
+                                .orElseThrow(() -> new NoSuchElementException(
+                                                "Booking not found with bookingId: " + bookingId));
+
+                return BookingDetailsResponse.builder()
+                                .bookingId(booking.getBookingId())
+                                .customerId(booking.getCustomerId())
+                                .serviceName(booking.getServiceName())
+                                .categoryName(booking.getCategoryName())
+                                .scheduledDate(booking.getScheduledDate())
+                                .timeSlot(booking.getTimeSlot())
+                                .address(booking.getAddress())
+                                .issueDescription(booking.getIssueDescription())
+                                .paymentMode(booking.getPaymentMode())
+                                .status(booking.getStatus().name())
+                                .createdAt(booking.getCreatedAt())
+                                .build();
+        }
 }

@@ -39,4 +39,11 @@ public class BookingController {
 		return ResponseEntity.ok(bookings);
 	}
 
+	@GetMapping("{bookingId}")
+	public ResponseEntity<BookingDetailsResponse> getBookingByBookingId(@PathVariable String bookingId) {
+
+		BookingDetailsResponse response = bookingService.getBookingByBookingId(bookingId);
+
+		return ResponseEntity.ok(response);
+	}
 }
