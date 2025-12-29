@@ -65,11 +65,19 @@ public class BookingController {
 
 		return ResponseEntity.ok(history);
 	}
+
 	@PutMapping("/{bookingId}/reschedule")
 	public ResponseEntity<RescheduleBookingResponse> rescheduleBooking(@PathVariable String bookingId,
 			@Valid @RequestBody RescheduleBookingRequest request) {
 
 		RescheduleBookingResponse response = bookingService.rescheduleBooking(bookingId, request);
+
+		return ResponseEntity.ok(response);
+	}
+
+	@PutMapping("/{bookingId}/cancel")
+	public ResponseEntity<CancelBookingResponse> cancelBooking(@PathVariable String bookingId) {
+		CancelBookingResponse response = bookingService.cancelBooking(bookingId);
 
 		return ResponseEntity.ok(response);
 	}

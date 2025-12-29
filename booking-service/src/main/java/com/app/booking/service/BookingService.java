@@ -173,4 +173,40 @@ public class BookingService {
                     .message("Booking has been rescheduled")
                     .build();
         }
+
+        public CancelBookingResponse cancelBooking(String bookingId) {
+
+            Booking booking = bookingRepository.findByBookingId(bookingId)
+                    .orElseThrow(() ->
+                            new BookingNotFoundException(bookingId)
+                    );
+
+//            check is booking already cancelled
+            if (booking.getStatus() == BookingStatus.CANCELLED) {
+            	throw new BusinessValidationException("Booking already cancelled");
+//                return CancelBookingResponse.builder()
+//                        .bookingId(bookingId)
+//                        .status("CANCELLED")
+//                        .message("Booking is already cancelled")
+//                        .build();
+            }
+            
+            LocalTime startTime = parseStartTime(booking.getTimeSlot());
+            LocalDateTime bookingDateTime =
+                    LocalDateTime.of(booking.getScheduledDate(), startTime);
+
+            if (Duration.between(LocalDateTime.now(), bookingDateTime).toHours() < 24) {
+                throw new BusinessValidationException(
+                        "Booking cannot be cancelled within 24 hours of service time");
+            }
+
+            booking.setStatus(BookingStatus.CANCELLED);
+            bookingRepository.save(booking);
+
+            return CancelBookingResponse.builder()
+                    .bookingId(bookingId)
+                    .status("CANCELLED")
+                    .message("Booking cancelled")
+                    .build();
+        }
 }
