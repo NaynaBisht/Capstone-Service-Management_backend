@@ -94,4 +94,24 @@ public class BookingService {
                                 .createdAt(booking.getCreatedAt())
                                 .build();
         }
+        public List<BookingListResponse> getMyBookings(String customerId) {
+
+            List<Booking> bookings =
+                    bookingRepository.findByCustomerId(customerId);
+
+            return bookings.stream()
+                    .map(booking -> BookingListResponse.builder()
+                            .bookingId(booking.getBookingId())
+                            .customerId(booking.getCustomerId())
+                            .serviceName(booking.getServiceName())
+                            .categoryName(booking.getCategoryName())
+                            .scheduledDate(booking.getScheduledDate())
+                            .timeSlot(booking.getTimeSlot())
+                            .address(booking.getAddress())
+                            .status(booking.getStatus().name())
+                            .createdAt(booking.getCreatedAt())
+                            .build()
+                    )
+                    .toList();
+        }
 }

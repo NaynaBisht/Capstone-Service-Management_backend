@@ -46,4 +46,15 @@ public class BookingController {
 
 		return ResponseEntity.ok(response);
 	}
+
+	@GetMapping("/my-bookings")
+	public ResponseEntity<List<BookingListResponse>> getMyBookings() {
+
+		// TEMP: until JWT is added
+		String customerId = "CUSTOMER_001";
+
+		List<BookingListResponse> bookings = bookingService.getMyBookings(customerId);
+
+		return ResponseEntity.ok(bookings);
+	}
 }
