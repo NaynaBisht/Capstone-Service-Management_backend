@@ -1,0 +1,100 @@
+# Created by https://www.gitignore.io/
+
+# General Java
+*.class
+*.jar
+*.war
+*.ear
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.next
+pom.xml.orig
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.stacktrace
+dependency-reduced-pom.xml
+buildlog.*
+*.log
+
+# Gradle
+.gradle/
+build/
+out/
+.gradletasknamecache
+
+# Spring Boot
+.flattened-pom.xml
+.sts4-cache/
+/code
+
+# IDE-specific files (add yours as needed)
+## Eclipse
+.metadata/
+bin/
+tmp/
+.settings/
+.loadpath
+.recommenders/
+.project
+.classpath
+.springBeans
+
+## IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+## VS Code
+.vscode/
+
+# Operating System files
+.DS_Store # macOS
+Thumbs.db # Windows
+desktop.ini # Windows
+
+# Project-specific/Sensitive files
+# Exclude environment-specific configuration files or sensitive data
+# e.g., src/main/resources/application-dev.properties
+# e.g., secrets.yml
+
+
+# Compiled output
+/dist
+/tmp
+/out-tsc
+/bazel-out
+
+# Node dependencies
+/node_modules
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+/.history # Optional: ignore VS Code's local history feature files
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+src/environments/*.local.ts # Optional: specific local environment files
+
+# Coverage
+/coverage
+
+# Angular cache
+/.angular/cache
