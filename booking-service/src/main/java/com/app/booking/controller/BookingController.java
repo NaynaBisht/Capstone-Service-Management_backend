@@ -33,6 +33,10 @@ public class BookingController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
-	
+	@GetMapping
+	public ResponseEntity<List<BookingListResponse>> getAllBookings() {
+		List<BookingListResponse> bookings = bookingService.getAllBookings();
+		return ResponseEntity.ok(bookings);
+	}
 
 }
