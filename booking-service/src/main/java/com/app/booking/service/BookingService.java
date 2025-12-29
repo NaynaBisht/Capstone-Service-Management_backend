@@ -209,4 +209,45 @@ public class BookingService {
                     .message("Booking cancelled")
                     .build();
         }
+
+        private LocalTime parseStartTime(String timeSlot) {
+			try {
+				String start = timeSlot.split("-")[0].trim(); // "10:00"
+				return LocalTime.parse(start);
+			} catch (Exception ex) {
+				throw new BusinessValidationException("Invalid time slot format. Expected format: HH:mm - HH:mm");
+			}
+		}
+
+		private LocalTime parseEndTime(String timeSlot) {
+			try {
+				String end = timeSlot.split("-")[1].trim(); // "12:00"
+				return LocalTime.parse(end);
+			} catch (Exception ex) {
+				throw new BusinessValidationException("Invalid time slot format. Expected format: HH:mm - HH:mm");
+			}
+		}
+
+		public List<BookingListResponse> getAssignedBookingsForTechnician(
+                String technicianId
+        ) {
+
+            List<Booking> bookings =
+                    bookingRepository.findByTechnicianId(technicianId);
+
+            return bookings.stream()
+                    .map(booking -> BookingListResponse.builder()
+                            .bookingId(booking.getBookingId())
+                            .customerId(booking.getCustomerId())
+                            .serviceName(booking.getServiceName())
+                            .categoryName(booking.getCategoryName())
+                            .scheduledDate(booking.getScheduledDate())
+                            .timeSlot(booking.getTimeSlot())
+                            .address(booking.getAddress())
+                            .status(booking.getStatus().name())
+                            .createdAt(booking.getCreatedAt())
+                            .build()
+                    )
+                    .toList();
+        }
 }
