@@ -49,6 +49,12 @@ public class ServiceCatalogService {
                 .map(this::toResponse)
                 .toList();
     }
+    
+    public ServiceResponse getServiceById(String id) {
+        ServiceEntity service = serviceRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Service not found"));
+        return toResponse(service);
+    }
 
     private ServiceResponse toResponse(ServiceEntity service) {
         return ServiceResponse.builder()

@@ -24,5 +24,14 @@ public class ServiceCatalogController {
 		return ResponseEntity.ok(serviceCatalogService.createService(request));
 	}
 
+	// ALL authenticated users
+	@GetMapping
+	public ResponseEntity<List<ServiceResponse>> getAllServices() {
+		return ResponseEntity.ok(serviceCatalogService.getAllServices());
+	}
 	
+	@GetMapping("/{id}")
+	public ResponseEntity<ServiceResponse> getServiceById(@PathVariable String id) {
+		return ResponseEntity.ok(serviceCatalogService.getServiceById(id));
+	}
 }
