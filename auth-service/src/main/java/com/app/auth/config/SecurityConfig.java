@@ -28,8 +28,6 @@ public class SecurityConfig {
                     "/api/auth/login"
                 ).permitAll()
                 .requestMatchers("/api/auth/create-manager").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/services").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/services/**").hasRole("ADMIN")
                 .anyRequest()
                 .authenticated()
             )
