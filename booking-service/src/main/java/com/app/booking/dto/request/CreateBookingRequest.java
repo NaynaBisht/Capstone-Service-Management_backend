@@ -8,39 +8,47 @@ import lombok.*;
 
 import java.time.LocalDate;
 
+import com.app.booking.model.Address;
+import com.app.booking.model.PaymentMode;
+import com.app.booking.model.TimeSlot;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class CreateBookingRequest {
 
-	@NotBlank(message = "Service name is required")
+    // Service Catalog references
+    @NotBlank(message = "Service ID is required")
+    private String serviceId;
+
+    @NotBlank(message = "Service name is required")
     private String serviceName;
+
+    @NotBlank(message = "Category ID is required")
+    private String categoryId;
 
     @NotBlank(message = "Category name is required")
     private String categoryName;
 
+    // Schedule
     @NotNull(message = "Scheduled date is required")
     @FutureOrPresent(message = "Scheduled date cannot be in the past")
     private LocalDate scheduledDate;
 
-    @NotBlank(message = "Time slot is required")
-    @Pattern(
-        regexp = "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]\\s*-\\s*([0-1]?[0-9]|2[0-3]):[0-5][0-9]$",
-        message = "Time slot must be in format 'HH:MM - HH:MM' (e.g., '10:00 - 12:00')"
-    )
-    private String timeSlot;
+    @NotNull(message = "Time slot is required")
+    private TimeSlot timeSlot;
 
-    @NotBlank(message = "Address is required")
-    private String address;
+    // Address
+    @NotNull(message = "Service address is required")
+    private Address address;
 
+    // Problem description
     @NotBlank(message = "Issue description is required")
     private String issueDescription;
 
-    @NotBlank(message = "Payment mode is required")
-    @Pattern(
-        regexp = "ONLINE|CASH",
-        message = "Payment mode must be either 'ONLINE' or 'CASH'"
-    )
-    private String paymentMode;
+    // Payment
+    @NotNull(message = "Payment mode is required")
+    private PaymentMode paymentMode;
 }
+
