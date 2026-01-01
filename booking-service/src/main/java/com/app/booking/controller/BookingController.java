@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,7 +27,13 @@ public class BookingController {
 
 	@PostMapping
 	public ResponseEntity<BookingResponse> createBooking(@Valid @RequestBody CreateBookingRequest request) {
-		String customerId = "CUSTOMER_001";
+		
+		// String customerId = "CUSTOMER_001";
+		String customerId =
+			    (String) SecurityContextHolder.getContext()
+			        .getAuthentication()
+			        .getPrincipal();
+
 
 		BookingResponse response = bookingService.createBooking(request, customerId);
 
@@ -51,7 +58,12 @@ public class BookingController {
 	public ResponseEntity<List<BookingListResponse>> getMyBookings() {
 
 		// TEMP: until JWT is added
-		String customerId = "CUSTOMER_001";
+		// String customerId = "CUSTOMER_001";
+		String customerId =
+			    (String) SecurityContextHolder.getContext()
+			        .getAuthentication()
+			        .getPrincipal();
+
 
 		List<BookingListResponse> bookings = bookingService.getMyBookings(customerId);
 
@@ -67,18 +79,19 @@ public class BookingController {
 	}
 
 	@PutMapping("/{bookingId}/reschedule")
-	public ResponseEntity<RescheduleBookingResponse> rescheduleBooking(@PathVariable String bookingId,
+	public ResponseEntity<RescheduleBookingResponse> rescheduleBooking(@PathVariable String bookingId, String customerId,
 			@Valid @RequestBody RescheduleBookingRequest request) {
 
-		RescheduleBookingResponse response = bookingService.rescheduleBooking(bookingId, request);
+		RescheduleBookingResponse response = bookingService.rescheduleBooking(bookingId, customerId, request);
 
 		return ResponseEntity.ok(response);
 	}
 
 	@PutMapping("/{bookingId}/cancel")
-	public ResponseEntity<CancelBookingResponse> cancelBooking(@PathVariable String bookingId) {
-		CancelBookingResponse response = bookingService.cancelBooking(bookingId);
+	public ResponseEntity<CancelBookingResponse> cancelBooking(@PathVariable String bookingId, String customerId) {
+		CancelBookingResponse response = bookingService.cancelBooking(bookingId, customerId);
 
 		return ResponseEntity.ok(response);
 	}
+
 }

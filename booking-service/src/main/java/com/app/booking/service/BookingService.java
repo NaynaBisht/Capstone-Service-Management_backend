@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.app.booking.dto.request.CreateBookingRequest;
@@ -31,18 +32,31 @@ public class BookingService {
 
         private final BookingRepository bookingRepository;
 
+        private void validateBookingOwnership(Booking booking, String customerId) {
+                if (!booking.getCustomerId().equals(customerId)) {
+                        throw new AccessDeniedException("Unauthorized access to booking");
+                }
+        }
+
         public BookingResponse createBooking(CreateBookingRequest request, String customerId) {
 
                 Booking booking = Booking.builder()
                                 .bookingId("BK-" + UUID.randomUUID().toString().substring(0, 8))
                                 .customerId(customerId)
+
+                                .serviceId(request.getServiceId())
                                 .serviceName(request.getServiceName())
+                                .categoryId(request.getCategoryId())
                                 .categoryName(request.getCategoryName())
+
                                 .scheduledDate(request.getScheduledDate())
                                 .timeSlot(request.getTimeSlot())
-                                .address(request.getAddress())
+
+                                .serviceAddress(request.getAddress())
+
                                 .issueDescription(request.getIssueDescription())
                                 .paymentMode(request.getPaymentMode())
+
                                 .status(BookingStatus.CONFIRMED)
                                 .createdAt(LocalDateTime.now())
                                 .build();
@@ -63,12 +77,14 @@ public class BookingService {
                                 .map(booking -> BookingListResponse.builder()
                                                 .bookingId(booking.getBookingId())
                                                 .customerId(booking.getCustomerId())
+                                                .serviceId(booking.getServiceId())
                                                 .serviceName(booking.getServiceName())
+                                                .categoryId(booking.getCategoryId())
                                                 .categoryName(booking.getCategoryName())
                                                 .scheduledDate(booking.getScheduledDate())
                                                 .timeSlot(booking.getTimeSlot())
-                                                .address(booking.getAddress())
-                                                .status(booking.getStatus().name())
+                                                .serviceAddress(booking.getServiceAddress())
+                                                .status(booking.getStatus())
                                                 .createdAt(booking.getCreatedAt())
                                                 .build())
                                 .toList();
@@ -77,177 +93,132 @@ public class BookingService {
         public BookingDetailsResponse getBookingByBookingId(String bookingId) {
 
                 Booking booking = bookingRepository.findByBookingId(bookingId)
-                                .orElseThrow(() -> new NoSuchElementException(
-                                                "Booking not found with bookingId: " + bookingId));
+                                .orElseThrow(() -> new BookingNotFoundException(bookingId));
 
                 return BookingDetailsResponse.builder()
                                 .bookingId(booking.getBookingId())
                                 .customerId(booking.getCustomerId())
+                                .serviceId(booking.getServiceId())
                                 .serviceName(booking.getServiceName())
+                                .categoryId(booking.getCategoryId())
                                 .categoryName(booking.getCategoryName())
                                 .scheduledDate(booking.getScheduledDate())
                                 .timeSlot(booking.getTimeSlot())
-                                .address(booking.getAddress())
+                                .serviceAddress(booking.getServiceAddress())
                                 .issueDescription(booking.getIssueDescription())
                                 .paymentMode(booking.getPaymentMode())
-                                .status(booking.getStatus().name())
+                                .status(booking.getStatus())
                                 .createdAt(booking.getCreatedAt())
                                 .build();
         }
+
         public List<BookingListResponse> getMyBookings(String customerId) {
 
-            List<Booking> bookings =
-                    bookingRepository.findByCustomerId(customerId);
+                List<Booking> bookings = bookingRepository.findByCustomerId(customerId);
 
-            return bookings.stream()
-                    .map(booking -> BookingListResponse.builder()
-                            .bookingId(booking.getBookingId())
-                            .customerId(booking.getCustomerId())
-                            .serviceName(booking.getServiceName())
-                            .categoryName(booking.getCategoryName())
-                            .scheduledDate(booking.getScheduledDate())
-                            .timeSlot(booking.getTimeSlot())
-                            .address(booking.getAddress())
-                            .status(booking.getStatus().name())
-                            .createdAt(booking.getCreatedAt())
-                            .build()
-                    )
-                    .toList();
+                return bookings.stream()
+                                .map(booking -> BookingListResponse.builder()
+                                                .bookingId(booking.getBookingId())
+                                                // customerId intentionally omitted
+                                                .serviceId(booking.getServiceId())
+                                                .serviceName(booking.getServiceName())
+                                                .categoryId(booking.getCategoryId())
+                                                .categoryName(booking.getCategoryName())
+                                                .scheduledDate(booking.getScheduledDate())
+                                                .timeSlot(booking.getTimeSlot())
+                                                .serviceAddress(booking.getServiceAddress())
+                                                .status(booking.getStatus())
+                                                .createdAt(booking.getCreatedAt())
+                                                .build())
+                                .toList();
         }
+
         public List<BookingListResponse> getBookingHistory() {
 
-            List<Booking> bookings =
-                    bookingRepository.findAllByOrderByCreatedAtDesc();
+                List<Booking> bookings = bookingRepository.findAllByOrderByCreatedAtDesc();
 
-            return bookings.stream()
-                    .map(booking -> BookingListResponse.builder()
-                            .bookingId(booking.getBookingId())
-                            .customerId(booking.getCustomerId())
-                            .serviceName(booking.getServiceName())
-                            .categoryName(booking.getCategoryName())
-                            .scheduledDate(booking.getScheduledDate())
-                            .timeSlot(booking.getTimeSlot())
-                            .address(booking.getAddress())
-                            .status(booking.getStatus().name())
-                            .createdAt(booking.getCreatedAt())
-                            .build()
-                    )
-                    .toList();
+                return bookings.stream()
+                                .map(booking -> BookingListResponse.builder()
+                                                .bookingId(booking.getBookingId())
+                                                .customerId(booking.getCustomerId())
+                                                .serviceId(booking.getServiceId())
+                                                .serviceName(booking.getServiceName())
+                                                .categoryId(booking.getCategoryId())
+                                                .categoryName(booking.getCategoryName())
+                                                .scheduledDate(booking.getScheduledDate())
+                                                .timeSlot(booking.getTimeSlot())
+                                                .serviceAddress(booking.getServiceAddress())
+                                                .status(booking.getStatus())
+                                                .createdAt(booking.getCreatedAt())
+                                                .build())
+                                .toList();
         }
 
-        public RescheduleBookingResponse rescheduleBooking(String bookingId, RescheduleBookingRequest request) {
+        public RescheduleBookingResponse rescheduleBooking(String bookingId, String customerId,
+                        RescheduleBookingRequest request) {
 
-            Booking booking = bookingRepository.findByBookingId(bookingId)
-                    .orElseThrow(() ->
-                            new BookingNotFoundException(bookingId)
-                    );
+                Booking booking = bookingRepository.findByBookingId(bookingId)
+                                .orElseThrow(() -> new BookingNotFoundException(bookingId));
 
-            // check if booking is cancelled
-            if (booking.getStatus() == BookingStatus.CANCELLED) {
-            	throw new BusinessValidationException(
-                        "Cancelled booking cannot be rescheduled");
-//                return RescheduleBookingResponse.builder()
-//                        .bookingId(bookingId)
-//                        .status("CANCELLED")
-//                        .message("Cancelled booking cannot be rescheduled")
-//                        .build();
-            }
+                validateBookingOwnership(booking, customerId);
 
-            LocalTime newStartTime = parseStartTime(request.getTimeSlot());
-            LocalDateTime newDateTime =
-                    LocalDateTime.of(request.getScheduledDate(), newStartTime);
+                if (booking.getStatus() == BookingStatus.CANCELLED ||
+                                booking.getStatus() == BookingStatus.COMPLETED) {
+                        throw new BusinessValidationException(
+                                        "Booking cannot be rescheduled");
+                }
 
-            if (newDateTime.isBefore(LocalDateTime.now())) {
-                throw new BusinessValidationException(
-                        "Cannot reschedule to past date or time");
-            }
-            
-            booking.setScheduledDate(request.getScheduledDate());
-            booking.setTimeSlot(request.getTimeSlot());
-            
-            bookingRepository.save(booking);
+                LocalDateTime newDateTime = LocalDateTime.of(
+                                request.getScheduledDate(),
+                                request.getTimeSlot().getStart());
 
-            return RescheduleBookingResponse.builder()
-                    .bookingId(bookingId)
-                    .status(booking.getStatus().name())
-                    .message("Booking has been rescheduled")
-                    .build();
+                if (newDateTime.isBefore(LocalDateTime.now())) {
+                        throw new BusinessValidationException(
+                                        "Cannot reschedule to past date or time");
+                }
+
+                booking.setScheduledDate(request.getScheduledDate());
+                booking.setTimeSlot(request.getTimeSlot());
+
+                booking.setStatus(BookingStatus.RESCHEDULED);
+                bookingRepository.save(booking);
+
+                return RescheduleBookingResponse.builder()
+                                .bookingId(bookingId)
+                                .status("RESCHEDULED")
+                                .message("Booking has been rescheduled")
+                                .build();
         }
 
-        public CancelBookingResponse cancelBooking(String bookingId) {
+        public CancelBookingResponse cancelBooking(String bookingId, String customerId) {
 
-            Booking booking = bookingRepository.findByBookingId(bookingId)
-                    .orElseThrow(() ->
-                            new BookingNotFoundException(bookingId)
-                    );
+                Booking booking = bookingRepository.findByBookingId(bookingId)
+                                .orElseThrow(() -> new BookingNotFoundException(bookingId));
 
-//            check is booking already cancelled
-            if (booking.getStatus() == BookingStatus.CANCELLED) {
-            	throw new BusinessValidationException("Booking already cancelled");
-//                return CancelBookingResponse.builder()
-//                        .bookingId(bookingId)
-//                        .status("CANCELLED")
-//                        .message("Booking is already cancelled")
-//                        .build();
-            }
-            
-            LocalTime startTime = parseStartTime(booking.getTimeSlot());
-            LocalDateTime bookingDateTime =
-                    LocalDateTime.of(booking.getScheduledDate(), startTime);
+                validateBookingOwnership(booking, customerId);
 
-            if (Duration.between(LocalDateTime.now(), bookingDateTime).toHours() < 24) {
-                throw new BusinessValidationException(
-                        "Booking cannot be cancelled within 24 hours of service time");
-            }
+                if (booking.getStatus() == BookingStatus.CANCELLED ||
+                                booking.getStatus() == BookingStatus.COMPLETED) {
+                        throw new BusinessValidationException(
+                                        "Booking cannot be cancelled");
+                }
 
-            booking.setStatus(BookingStatus.CANCELLED);
-            bookingRepository.save(booking);
+                LocalDateTime bookingDateTime = LocalDateTime.of(
+                                booking.getScheduledDate(),
+                                booking.getTimeSlot().getStart());
 
-            return CancelBookingResponse.builder()
-                    .bookingId(bookingId)
-                    .status("CANCELLED")
-                    .message("Booking cancelled")
-                    .build();
-        }
+                if (Duration.between(LocalDateTime.now(), bookingDateTime).toHours() < 24) {
+                        throw new BusinessValidationException(
+                                        "Booking cannot be cancelled within 24 hours of service time");
+                }
 
-        private LocalTime parseStartTime(String timeSlot) {
-			try {
-				String start = timeSlot.split("-")[0].trim(); // "10:00"
-				return LocalTime.parse(start);
-			} catch (Exception ex) {
-				throw new BusinessValidationException("Invalid time slot format. Expected format: HH:mm - HH:mm");
-			}
-		}
+                booking.setStatus(BookingStatus.CANCELLED);
+                bookingRepository.save(booking);
 
-		private LocalTime parseEndTime(String timeSlot) {
-			try {
-				String end = timeSlot.split("-")[1].trim(); // "12:00"
-				return LocalTime.parse(end);
-			} catch (Exception ex) {
-				throw new BusinessValidationException("Invalid time slot format. Expected format: HH:mm - HH:mm");
-			}
-		}
-
-		public List<BookingListResponse> getAssignedBookingsForTechnician(
-                String technicianId
-        ) {
-
-            List<Booking> bookings =
-                    bookingRepository.findByTechnicianId(technicianId);
-
-            return bookings.stream()
-                    .map(booking -> BookingListResponse.builder()
-                            .bookingId(booking.getBookingId())
-                            .customerId(booking.getCustomerId())
-                            .serviceName(booking.getServiceName())
-                            .categoryName(booking.getCategoryName())
-                            .scheduledDate(booking.getScheduledDate())
-                            .timeSlot(booking.getTimeSlot())
-                            .address(booking.getAddress())
-                            .status(booking.getStatus().name())
-                            .createdAt(booking.getCreatedAt())
-                            .build()
-                    )
-                    .toList();
+                return CancelBookingResponse.builder()
+                                .bookingId(bookingId)
+                                .status("CANCELLED")
+                                .message("Booking cancelled")
+                                .build();
         }
 }
