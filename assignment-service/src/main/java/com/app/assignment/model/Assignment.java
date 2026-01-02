@@ -7,11 +7,6 @@ import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Document(collection = "assignments")
 @CompoundIndexes({
         @CompoundIndex(
@@ -23,18 +18,19 @@ import java.time.Instant;
                 def = "{'technicianId': 1, 'status': 1}"
         )
 })
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Assignment {
 
     @Id
     private String assignmentId;
 
     private String bookingId;
-    private String customerId;
-
-    private String serviceId;
-    private String categoryId;
 
     private String technicianId;
+    private String technicianUserId;
 
     private AssignmentStatus status;
 
@@ -45,5 +41,5 @@ public class Assignment {
     private Instant startedAt;
     private Instant completedAt;
 
-    private Integer attemptCount; // reassignment attempts
+    private Integer attemptCount;
 }
