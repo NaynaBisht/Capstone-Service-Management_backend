@@ -4,6 +4,7 @@ import com.app.technician.dto.request.TechnicianOnboardRequest;
 import com.app.technician.dto.response.ApproveTechnicianResponse;
 import com.app.technician.dto.response.TechnicianOnboardResponse;
 import com.app.technician.model.AvailabilityStatus;
+import com.app.technician.model.SkillType;
 import com.app.technician.model.Technician;
 import com.app.technician.model.TechnicianStatus;
 import com.app.technician.repository.TechnicianRepository;
@@ -169,5 +170,28 @@ public class TechnicianService {
             technicianRepository.save(technician);
         }
 
+        public List<Technician> searchTechnicians(
+                SkillType skill,
+                String city,
+                AvailabilityStatus availability,
+                TechnicianStatus status
+        ) {
+
+            List<Technician> technicians =
+                    technicianRepository.findByCityAndStatusAndAvailability(
+                            city,
+                            status,
+                            availability
+                    );
+
+            // Filter by skill (Mongo array contains)
+            if (skill != null) {
+                technicians = technicians.stream()
+                        .filter(t -> t.getSkills().contains(skill))
+                        .toList();
+            }
+
+            return technicians;
+        }
 
 }

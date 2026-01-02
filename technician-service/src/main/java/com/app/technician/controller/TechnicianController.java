@@ -5,6 +5,8 @@ import com.app.technician.dto.request.TechnicianOnboardRequest;
 import com.app.technician.dto.request.UpdateAvailabilityRequest;
 import com.app.technician.dto.response.ApproveTechnicianResponse;
 import com.app.technician.dto.response.TechnicianOnboardResponse;
+import com.app.technician.model.AvailabilityStatus;
+import com.app.technician.model.SkillType;
 import com.app.technician.model.Technician;
 import com.app.technician.model.TechnicianStatus;
 import com.app.technician.service.TechnicianService;
@@ -72,6 +74,21 @@ public class TechnicianController {
         technicianService.updateAvailability(
                 technicianId,
                 request.getAvailability()
+        );
+    }
+
+    @GetMapping("/search")
+    public List<Technician> searchTechnicians(
+            @RequestParam SkillType skill,
+            @RequestParam String city,
+            @RequestParam AvailabilityStatus availability,
+            @RequestParam TechnicianStatus status
+    ) {
+        return technicianService.searchTechnicians(
+                skill,
+                city,
+                availability,
+                status
         );
     }
 
