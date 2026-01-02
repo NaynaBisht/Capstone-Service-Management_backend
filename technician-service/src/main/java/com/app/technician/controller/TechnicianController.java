@@ -1,6 +1,7 @@
 package com.app.technician.controller;
 
 import com.app.technician.dto.request.TechnicianOnboardRequest;
+import com.app.technician.dto.response.ApproveTechnicianResponse;
 import com.app.technician.dto.response.TechnicianOnboardResponse;
 import com.app.technician.model.Technician;
 import com.app.technician.model.TechnicianStatus;
@@ -40,6 +41,13 @@ public class TechnicianController {
             @RequestParam TechnicianStatus status
     ) {
         return technicianService.getTechniciansByStatus(status);
+    }
+
+    @PostMapping("/{technicianId}/approve")
+    public ApproveTechnicianResponse approveTechnician(
+            @PathVariable String technicianId
+    ) {
+        return technicianService.approveTechnician(technicianId);
     }
 
 

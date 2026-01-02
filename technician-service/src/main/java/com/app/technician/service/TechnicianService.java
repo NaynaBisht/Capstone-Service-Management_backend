@@ -1,6 +1,7 @@
 package com.app.technician.service;
 
 import com.app.technician.dto.request.TechnicianOnboardRequest;
+import com.app.technician.dto.response.ApproveTechnicianResponse;
 import com.app.technician.dto.response.TechnicianOnboardResponse;
 import com.app.technician.model.AvailabilityStatus;
 import com.app.technician.model.Technician;
@@ -85,5 +86,44 @@ public class TechnicianService {
         ) {
             return technicianRepository.findByStatus(status);
         }
+        
+        public ApproveTechnicianResponse approveTechnician(
+                String technicianId
+        ) {
+
+            Technician technician = technicianRepository.findById(technicianId)
+                    .orElseThrow(() ->
+                            new IllegalArgumentException("Technician not found")
+                    );
+
+            if (technician.getStatus() != TechnicianStatus.PENDING) {
+                throw new IllegalStateException(
+                        "Only PENDING technicians can be approved"
+                );
+            }
+
+            // AUTH SERVICE CALL (STUB)
+            // Later this will be:
+            // POST http://auth-service/internal/users
+            // with email + role = TECHNICIAN
+
+            String generatedUserId = "user_" + System.currentTimeMillis();
+
+            // UPDATE TECHNICIAN
+            technician.setUserId(generatedUserId);
+            technician.setStatus(TechnicianStatus.APPROVED);
+            technician.setAvailability(AvailabilityStatus.AVAILABLE);
+            technician.setApprovedAt(LocalDateTime.now());
+
+            technicianRepository.save(technician);
+
+            return ApproveTechnicianResponse.builder()
+                    .technicianId(technician.getId())
+                    .userId(generatedUserId)
+                    .status(technician.getStatus())
+                    .message("Technician approved and account activated")
+                    .build();
+        }
+
 
 }
