@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -77,6 +78,12 @@ public class TechnicianService {
                 }
 
                 technicianRepository.save(technician);
+        }
+
+        public List<Technician> getTechniciansByStatus(
+                TechnicianStatus status
+        ) {
+            return technicianRepository.findByStatus(status);
         }
 
 }
