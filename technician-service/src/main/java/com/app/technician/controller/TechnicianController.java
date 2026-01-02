@@ -1,5 +1,6 @@
 package com.app.technician.controller;
 
+import com.app.technician.dto.request.RejectTechnicianRequest;
 import com.app.technician.dto.request.TechnicianOnboardRequest;
 import com.app.technician.dto.response.ApproveTechnicianResponse;
 import com.app.technician.dto.response.TechnicianOnboardResponse;
@@ -48,6 +49,17 @@ public class TechnicianController {
             @PathVariable String technicianId
     ) {
         return technicianService.approveTechnician(technicianId);
+    }
+
+    @PostMapping("/{technicianId}/reject")
+    public void rejectTechnician(
+            @PathVariable String technicianId,
+            @RequestBody RejectTechnicianRequest request
+    ) {
+        technicianService.rejectTechnician(
+                technicianId,
+                request.getReason()
+        );
     }
 
 

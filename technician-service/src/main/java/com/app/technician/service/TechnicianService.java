@@ -124,6 +124,30 @@ public class TechnicianService {
                     .message("Technician approved and account activated")
                     .build();
         }
+        
+        public void rejectTechnician(
+                String technicianId,
+                String reason
+        ) {
+
+            Technician technician = technicianRepository.findById(technicianId)
+                    .orElseThrow(() ->
+                            new IllegalArgumentException("Technician not found")
+                    );
+
+            if (technician.getStatus() != TechnicianStatus.PENDING) {
+                throw new IllegalStateException(
+                        "Only PENDING technicians can be rejected"
+                );
+            }
+
+            technician.setStatus(TechnicianStatus.REJECTED);
+            technician.setRejectionReason(reason);
+            technician.setAvailability(AvailabilityStatus.UNAVAILABLE);
+
+            technicianRepository.save(technician);
+        }
+
 
 
 }

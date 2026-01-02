@@ -36,6 +36,7 @@ public class Technician {
     private Integer experienceYears;
 
     private TechnicianStatus status;
+    private String rejectionReason;
 
     private AvailabilityStatus availability;
 
