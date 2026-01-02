@@ -149,7 +149,6 @@ public class TechnicianService {
             technicianRepository.save(technician);
         }
 
-
         public void updateAvailability(
                 String technicianId,
                 AvailabilityStatus availability
@@ -192,6 +191,16 @@ public class TechnicianService {
             }
 
             return technicians;
+        }
+
+        public Technician getTechnicianByUserId(String userId) {
+
+            return technicianRepository.findByUserId(userId)
+                    .orElseThrow(() ->
+                            new IllegalArgumentException(
+                                    "Technician not found for userId: " + userId
+                            )
+                    );
         }
 
 }

@@ -64,8 +64,7 @@ public class TechnicianController {
                 request.getReason()
         );
     }
-
-    
+  
     @PatchMapping("/{technicianId}/availability")
     public void updateAvailability(
             @PathVariable String technicianId,
@@ -90,6 +89,13 @@ public class TechnicianController {
                 availability,
                 status
         );
+    }
+
+    @GetMapping("/by-user/{userId}")
+    public Technician getByUserId(
+            @PathVariable String userId
+    ) {
+        return technicianService.getTechnicianByUserId(userId);
     }
 
 
