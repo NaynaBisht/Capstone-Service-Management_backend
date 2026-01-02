@@ -149,5 +149,25 @@ public class TechnicianService {
         }
 
 
+        public void updateAvailability(
+                String technicianId,
+                AvailabilityStatus availability
+        ) {
+
+            Technician technician = technicianRepository.findById(technicianId)
+                    .orElseThrow(() ->
+                            new IllegalArgumentException("Technician not found")
+                    );
+
+            if (technician.getStatus() != TechnicianStatus.APPROVED) {
+                throw new IllegalStateException(
+                        "Only APPROVED technicians can update availability"
+                );
+            }
+
+            technician.setAvailability(availability);
+            technicianRepository.save(technician);
+        }
+
 
 }

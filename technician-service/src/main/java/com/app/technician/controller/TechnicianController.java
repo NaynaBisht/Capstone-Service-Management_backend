@@ -2,6 +2,7 @@ package com.app.technician.controller;
 
 import com.app.technician.dto.request.RejectTechnicianRequest;
 import com.app.technician.dto.request.TechnicianOnboardRequest;
+import com.app.technician.dto.request.UpdateAvailabilityRequest;
 import com.app.technician.dto.response.ApproveTechnicianResponse;
 import com.app.technician.dto.response.TechnicianOnboardResponse;
 import com.app.technician.model.Technician;
@@ -59,6 +60,18 @@ public class TechnicianController {
         technicianService.rejectTechnician(
                 technicianId,
                 request.getReason()
+        );
+    }
+
+    
+    @PatchMapping("/{technicianId}/availability")
+    public void updateAvailability(
+            @PathVariable String technicianId,
+            @RequestBody UpdateAvailabilityRequest request
+    ) {
+        technicianService.updateAvailability(
+                technicianId,
+                request.getAvailability()
         );
     }
 
