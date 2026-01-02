@@ -17,12 +17,12 @@ public class SecurityConfig {
 
             // Authorization rules
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/api/technicians/onboard"
-                ).permitAll()
-                .anyRequest().authenticated()
-            )
-
+            	    .requestMatchers(
+            	        "/api/technicians/onboard",
+            	        "/api/technicians/**"
+            	    ).permitAll()
+            	    .anyRequest().authenticated()
+            	)
             // No sessions (microservice)
             .sessionManagement(session ->
                 session.sessionCreationPolicy(

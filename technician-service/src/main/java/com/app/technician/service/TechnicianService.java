@@ -8,6 +8,7 @@ import com.app.technician.model.TechnicianStatus;
 import com.app.technician.repository.TechnicianRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -49,4 +50,33 @@ public class TechnicianService {
                                 .message("Technician profile created. Verification pending.")
                                 .build();
         }
+
+        public void uploadDocuments(
+                        String technicianId,
+                        MultipartFile aadhar,
+                        MultipartFile certificate) {
+
+                Technician technician = technicianRepository.findById(technicianId)
+                                .orElseThrow(() -> new IllegalArgumentException("Technician not found"));
+
+                if (technician.getStatus() != TechnicianStatus.PENDING) {
+                        throw new IllegalStateException(
+                                        "Documents can be uploaded only for PENDING technicians");
+                }
+
+                if (aadhar != null) {
+                        technician.getDocuments().put(
+                                        "aadhaar",
+                                        "s3://mock-bucket/" + aadhar.getOriginalFilename());
+                }
+
+                if (certificate != null) {
+                        technician.getDocuments().put(
+                                        "certificate",
+                                        "s3://mock-bucket/" + certificate.getOriginalFilename());
+                }
+
+                technicianRepository.save(technician);
+        }
+
 }
