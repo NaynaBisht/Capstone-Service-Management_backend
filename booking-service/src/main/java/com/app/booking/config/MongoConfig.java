@@ -1,4 +1,4 @@
-package com.app.auth.config;
+package com.app.booking.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +17,6 @@ public class MongoConfig {
 
 	@Bean
 	public MongoTemplate mongoTemplate() {
-		return new MongoTemplate(mongoClient(), "auth_db");
+		return new MongoTemplate(mongoClient(), "booking_db");
 	}
 }
