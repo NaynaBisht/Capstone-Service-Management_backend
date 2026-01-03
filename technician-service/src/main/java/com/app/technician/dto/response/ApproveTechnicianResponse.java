@@ -12,5 +12,6 @@ public class ApproveTechnicianResponse {
     private String technicianId;
     private String userId;
     private TechnicianStatus status;
+    private String temporaryPassword;
     private String message;
 }

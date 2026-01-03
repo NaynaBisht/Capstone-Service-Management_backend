@@ -1,5 +1,7 @@
 package com.app.technician.service;
 
+import com.app.technician.client.AuthServiceClient;
+import com.app.technician.dto.auth.CreateTechnicianUserResponse;
 import com.app.technician.dto.request.TechnicianOnboardRequest;
 import com.app.technician.dto.response.ApproveTechnicianResponse;
 import com.app.technician.dto.response.TechnicianOnboardResponse;
@@ -21,6 +23,7 @@ import java.util.List;
 public class TechnicianService {
 
         private final TechnicianRepository technicianRepository;
+        private final AuthServiceClient authServiceClient;
 
         public TechnicianOnboardResponse onboardTechnician(
                         TechnicianOnboardRequest request) {
@@ -83,124 +86,99 @@ public class TechnicianService {
         }
 
         public List<Technician> getTechniciansByStatus(
-                TechnicianStatus status
-        ) {
-            return technicianRepository.findByStatus(status);
+                        TechnicianStatus status) {
+                return technicianRepository.findByStatus(status);
         }
-        
-        public ApproveTechnicianResponse approveTechnician(
-                String technicianId
-        ) {
 
-            Technician technician = technicianRepository.findById(technicianId)
-                    .orElseThrow(() ->
-                            new IllegalArgumentException("Technician not found")
-                    );
+        public ApproveTechnicianResponse approveTechnician(String technicianId) {
 
-            if (technician.getStatus() != TechnicianStatus.PENDING) {
-                throw new IllegalStateException(
-                        "Only PENDING technicians can be approved"
-                );
-            }
+                Technician technician = technicianRepository.findById(technicianId)
+                                .orElseThrow(() -> new IllegalArgumentException("Technician not found"));
 
-            // AUTH SERVICE CALL (STUB)
-            // Later this will be:
-            // POST http://auth-service/internal/users
-            // with email + role = TECHNICIAN
+                if (technician.getStatus() != TechnicianStatus.PENDING) {
+                        throw new IllegalStateException("Only PENDING technicians can be approved");
+                }
 
-            String generatedUserId = "user_" + System.currentTimeMillis();
+                CreateTechnicianUserResponse authResponse =
+                        authServiceClient.createTechnicianUser(technician.getEmail());
 
-            // UPDATE TECHNICIAN
-            technician.setUserId(generatedUserId);
-            technician.setStatus(TechnicianStatus.APPROVED);
-            technician.setAvailability(AvailabilityStatus.AVAILABLE);
-            technician.setApprovedAt(LocalDateTime.now());
+                technician.setUserId(authResponse.getUserId());
+                technician.setStatus(TechnicianStatus.APPROVED);
+                technician.setAvailability(AvailabilityStatus.AVAILABLE);
+                technician.setApprovedAt(LocalDateTime.now());
 
-            technicianRepository.save(technician);
+                technicianRepository.save(technician);
 
-            return ApproveTechnicianResponse.builder()
-                    .technicianId(technician.getId())
-                    .userId(generatedUserId)
-                    .status(technician.getStatus())
-                    .message("Technician approved and account activated")
-                    .build();
+                return ApproveTechnicianResponse.builder()
+                        .technicianId(technician.getId())
+                        .userId(authResponse.getUserId())
+                        .temporaryPassword(authResponse.getTemporaryPassword())
+                        .status(TechnicianStatus.APPROVED)
+                        .message("Technician approved and account activated")
+                        .build();
         }
-        
+
         public void rejectTechnician(
-                String technicianId,
-                String reason
-        ) {
+                        String technicianId,
+                        String reason) {
 
-            Technician technician = technicianRepository.findById(technicianId)
-                    .orElseThrow(() ->
-                            new IllegalArgumentException("Technician not found")
-                    );
+                Technician technician = technicianRepository.findById(technicianId)
+                                .orElseThrow(() -> new IllegalArgumentException("Technician not found"));
 
-            if (technician.getStatus() != TechnicianStatus.PENDING) {
-                throw new IllegalStateException(
-                        "Only PENDING technicians can be rejected"
-                );
-            }
+                if (technician.getStatus() != TechnicianStatus.PENDING) {
+                        throw new IllegalStateException(
+                                        "Only PENDING technicians can be rejected");
+                }
 
-            technician.setStatus(TechnicianStatus.REJECTED);
-            technician.setRejectionReason(reason);
-            technician.setAvailability(AvailabilityStatus.UNAVAILABLE);
+                technician.setStatus(TechnicianStatus.REJECTED);
+                technician.setRejectionReason(reason);
+                technician.setAvailability(AvailabilityStatus.UNAVAILABLE);
 
-            technicianRepository.save(technician);
+                technicianRepository.save(technician);
         }
 
         public void updateAvailability(
-                String technicianId,
-                AvailabilityStatus availability
-        ) {
+                        String technicianId,
+                        AvailabilityStatus availability) {
 
-            Technician technician = technicianRepository.findById(technicianId)
-                    .orElseThrow(() ->
-                            new IllegalArgumentException("Technician not found")
-                    );
+                Technician technician = technicianRepository.findById(technicianId)
+                                .orElseThrow(() -> new IllegalArgumentException("Technician not found"));
 
-            if (technician.getStatus() != TechnicianStatus.APPROVED) {
-                throw new IllegalStateException(
-                        "Only APPROVED technicians can update availability"
-                );
-            }
+                if (technician.getStatus() != TechnicianStatus.APPROVED) {
+                        throw new IllegalStateException(
+                                        "Only APPROVED technicians can update availability");
+                }
 
-            technician.setAvailability(availability);
-            technicianRepository.save(technician);
+                technician.setAvailability(availability);
+                technicianRepository.save(technician);
         }
 
         public List<Technician> searchTechnicians(
-                SkillType skill,
-                String city,
-                AvailabilityStatus availability,
-                TechnicianStatus status
-        ) {
+                        SkillType skill,
+                        String city,
+                        AvailabilityStatus availability,
+                        TechnicianStatus status) {
 
-            List<Technician> technicians =
-                    technicianRepository.findByCityAndStatusAndAvailability(
-                            city,
-                            status,
-                            availability
-                    );
+                List<Technician> technicians = technicianRepository.findByCityAndStatusAndAvailability(
+                                city,
+                                status,
+                                availability);
 
-            // Filter by skill (Mongo array contains)
-            if (skill != null) {
-                technicians = technicians.stream()
-                        .filter(t -> t.getSkills().contains(skill))
-                        .toList();
-            }
+                // Filter by skill (Mongo array contains)
+                if (skill != null) {
+                        technicians = technicians.stream()
+                                        .filter(t -> t.getSkills().contains(skill))
+                                        .toList();
+                }
 
-            return technicians;
+                return technicians;
         }
 
         public Technician getTechnicianByUserId(String userId) {
 
-            return technicianRepository.findByUserId(userId)
-                    .orElseThrow(() ->
-                            new IllegalArgumentException(
-                                    "Technician not found for userId: " + userId
-                            )
-                    );
+                return technicianRepository.findByUserId(userId)
+                                .orElseThrow(() -> new IllegalArgumentException(
+                                                "Technician not found for userId: " + userId));
         }
 
 }
