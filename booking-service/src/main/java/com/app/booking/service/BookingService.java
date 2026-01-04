@@ -1,16 +1,20 @@
 package com.app.booking.service;
 
 import java.time.Duration;
-
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.app.booking.dto.notification.BookingEventPublisher;
+import com.app.booking.dto.notification.NotificationEvent;
+import com.app.booking.dto.notification.NotificationEventType;
 import com.app.booking.dto.request.CreateBookingRequest;
 import com.app.booking.dto.request.RescheduleBookingRequest;
 import com.app.booking.dto.response.BookingDetailsResponse;
@@ -31,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 public class BookingService {
 
         private final BookingRepository bookingRepository;
+        private final BookingEventPublisher bookingEventPublisher;
 
         private void validateBookingOwnership(Booking booking, String customerId) {
                 if (!booking.getCustomerId().equals(customerId)) {
@@ -62,6 +67,22 @@ public class BookingService {
                                 .build();
 
                 bookingRepository.save(booking);
+                
+                NotificationEvent event = NotificationEvent.builder()
+                	    .eventType(NotificationEventType.BOOKING_CREATED)
+                	    .recipient(
+                	        new NotificationEvent.Recipient(booking.getCustomerId())
+                	    )
+                	    .data(Map.of(
+                	        "bookingId", booking.getBookingId(),
+                	        "serviceName", booking.getServiceName(),
+                	        "scheduledDate", booking.getScheduledDate(),
+                	        "timeSlot", booking.getTimeSlot()
+                	    ))
+                	    .timestamp(Instant.now())
+                	    .build();
+
+                	bookingEventPublisher.publish("notification.event", event);
 
                 return BookingResponse.builder()
                                 .bookingId(booking.getBookingId())
@@ -182,6 +203,21 @@ public class BookingService {
 
                 booking.setStatus(BookingStatus.RESCHEDULED);
                 bookingRepository.save(booking);
+                
+                NotificationEvent event = NotificationEvent.builder()
+                	    .eventType(NotificationEventType.BOOKING_RESCHEDULED)
+                	    .recipient(new NotificationEvent.Recipient(booking.getCustomerId()))
+                	    .data(Map.of(
+                	        "bookingId", booking.getBookingId(),
+                	        "serviceName", booking.getServiceName(),
+                	        "scheduledDate", booking.getScheduledDate(),
+                	        "timeSlot", booking.getTimeSlot()
+                	    ))
+                	    .timestamp(Instant.now())
+                	    .build();
+
+                	bookingEventPublisher.publish("notification.event", event);
+
 
                 return RescheduleBookingResponse.builder()
                                 .bookingId(bookingId)
@@ -214,6 +250,18 @@ public class BookingService {
 
                 booking.setStatus(BookingStatus.CANCELLED);
                 bookingRepository.save(booking);
+
+                NotificationEvent event = NotificationEvent.builder()
+                	    .eventType(NotificationEventType.BOOKING_CANCELLED)
+                	    .recipient(new NotificationEvent.Recipient(booking.getCustomerId()))
+                	    .data(Map.of(
+                	        "bookingId", booking.getBookingId(),
+                	        "serviceName", booking.getServiceName()
+                	    ))
+                	    .timestamp(Instant.now())
+                	    .build();
+
+                	bookingEventPublisher.publish("notification.event", event);
 
                 return CancelBookingResponse.builder()
                                 .bookingId(bookingId)

@@ -28,13 +28,11 @@ public class BookingController {
 	@PostMapping
 	public ResponseEntity<BookingResponse> createBooking(@Valid @RequestBody CreateBookingRequest request) {
 		
-		// String customerId = "CUSTOMER_001";
 		String customerId =
 			    (String) SecurityContextHolder.getContext()
 			        .getAuthentication()
 			        .getPrincipal();
-
-
+		
 		BookingResponse response = bookingService.createBooking(request, customerId);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -79,16 +77,24 @@ public class BookingController {
 	}
 
 	@PutMapping("/{bookingId}/reschedule")
-	public ResponseEntity<RescheduleBookingResponse> rescheduleBooking(@PathVariable String bookingId, String customerId,
+	public ResponseEntity<RescheduleBookingResponse> rescheduleBooking(@PathVariable String bookingId,
 			@Valid @RequestBody RescheduleBookingRequest request) {
 
+		String customerId = (String) SecurityContextHolder.getContext()
+	            .getAuthentication()
+	            .getPrincipal();
 		RescheduleBookingResponse response = bookingService.rescheduleBooking(bookingId, customerId, request);
 
 		return ResponseEntity.ok(response);
 	}
 
 	@PutMapping("/{bookingId}/cancel")
-	public ResponseEntity<CancelBookingResponse> cancelBooking(@PathVariable String bookingId, String customerId) {
+	public ResponseEntity<CancelBookingResponse> cancelBooking(@PathVariable String bookingId) {
+		
+		String customerId = (String) SecurityContextHolder.getContext()
+	            .getAuthentication()
+	            .getPrincipal();
+		
 		CancelBookingResponse response = bookingService.cancelBooking(bookingId, customerId);
 
 		return ResponseEntity.ok(response);
