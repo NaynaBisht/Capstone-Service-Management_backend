@@ -22,6 +22,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
 
+            		.requestMatchers("/internal/**").permitAll()
                 // CUSTOMER
                 .requestMatchers(HttpMethod.POST, "/api/bookings").hasRole("CUSTOMER")
                 .requestMatchers("/api/bookings/my-bookings").hasRole("CUSTOMER")

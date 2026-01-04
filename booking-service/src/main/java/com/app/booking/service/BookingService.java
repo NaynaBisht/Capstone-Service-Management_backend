@@ -82,7 +82,7 @@ public class BookingService {
                 	    .timestamp(Instant.now())
                 	    .build();
 
-                	bookingEventPublisher.publish("notification.event", event);
+                	bookingEventPublisher.publish(event);
 
                 return BookingResponse.builder()
                                 .bookingId(booking.getBookingId())
@@ -216,7 +216,7 @@ public class BookingService {
                 	    .timestamp(Instant.now())
                 	    .build();
 
-                	bookingEventPublisher.publish("notification.event", event);
+                	bookingEventPublisher.publish(event);
 
 
                 return RescheduleBookingResponse.builder()
@@ -261,7 +261,7 @@ public class BookingService {
                 	    .timestamp(Instant.now())
                 	    .build();
 
-                	bookingEventPublisher.publish("notification.event", event);
+                	bookingEventPublisher.publish(event);
 
                 return CancelBookingResponse.builder()
                                 .bookingId(bookingId)

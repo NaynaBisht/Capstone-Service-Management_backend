@@ -2,9 +2,7 @@ package com.app.booking.dto.notification;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -14,19 +12,16 @@ public class BookingEventPublisher {
 
     private final RabbitTemplate rabbitTemplate;
 
-    @Value("${notification.exchange}")
-    private String exchange;
+    private static final String EXCHANGE = "notification.exchange";
+    private static final String ROUTING_KEY = "notification.event";
 
-    public void publish(String routingKey, NotificationEvent event) {
+    public void publish(NotificationEvent event) {
 
-        rabbitTemplate.convertAndSend(exchange, routingKey, event);
+        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY, event);
 
         log.info(
-            "Published booking event [{}] with routing key [{}]",
-            event.getEventType(),
-            routingKey
+            "Published booking event [{}]",
+            event.getEventType()
         );
     }
 }
-
-
