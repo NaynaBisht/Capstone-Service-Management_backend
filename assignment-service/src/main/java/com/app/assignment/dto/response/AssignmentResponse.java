@@ -10,17 +10,13 @@ import java.time.Instant;
 @Builder
 public class AssignmentResponse {
 
-	private String assignmentId;
+    private String assignmentId;
+    private String bookingId;
 
-	private String bookingId;
+    private String technicianId;
+    private String technicianUserId;
 
-	private String serviceId;
-	private String categoryId;
+    private AssignmentStatus status;
 
-	private AssignmentStatus status;
-
-	private Instant createdAt;
-	private Instant acceptedAt;
-	private Instant startedAt;
-	private Instant completedAt;
+    private Instant createdAt;
 }
