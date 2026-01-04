@@ -26,7 +26,8 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/api/auth/register",
                     "/api/auth/login",
-                    "/internal/**"
+                    "/internal/**",
+                    "/error"
                 ).permitAll()
                 .requestMatchers("/api/auth/create-manager").hasRole("ADMIN")
                 .anyRequest()
