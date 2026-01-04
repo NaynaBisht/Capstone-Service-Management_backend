@@ -19,7 +19,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
             	    .requestMatchers(
             	        "/api/technicians/onboard",
-            	        "/api/technicians/**"
+            	        "/api/technicians/**",
+            	        "/internal/**"
             	    ).permitAll()
             	    .anyRequest().authenticated()
             	)
