@@ -9,18 +9,15 @@ import java.util.Optional;
 
 public interface AssignmentRepository extends MongoRepository<Assignment, String> {
 
-	// One booking → one active assignment
-	Optional<Assignment> findByBookingId(String bookingId);
+	// Technician: Get all assignments for logged-in technician
+	List<Assignment> findByTechnicianUserId(String technicianUserId);
 
-	// Technician dashboard
-	List<Assignment> findByTechnicianId(String technicianId);
+	// Technician: Get assignments by status (useful for filters later)
+	List<Assignment> findByTechnicianUserIdAndStatus(String technicianUserId, AssignmentStatus status);
 
-	// Technician active jobs
-	List<Assignment> findByTechnicianIdAndStatusIn(String technicianId, List<AssignmentStatus> statuses);
+	// Admin/System: Fetch all assignments for a booking
+	List<Assignment> findByBookingId(String bookingId);
 
-	// Admin / Manager views
-	List<Assignment> findByStatus(AssignmentStatus status);
-
-	// Reassignment support
-	List<Assignment> findByBookingIdAndStatus(String bookingId, AssignmentStatus status);
+	// System: Check if active assignment exists for booking
+	Optional<Assignment> findFirstByBookingIdAndStatus(String bookingId, AssignmentStatus status);
 }

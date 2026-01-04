@@ -42,4 +42,8 @@ public class Assignment {
     private Instant completedAt;
 
     private Integer attemptCount;
+    
+    private Instant cancelledAt;
+    private String cancelReason;
+
 }
