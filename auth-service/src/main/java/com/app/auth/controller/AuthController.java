@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.Instant;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,13 +24,11 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
         authService.register(request);
-        return ResponseEntity.ok("User registered");
+        return ResponseEntity.status(HttpStatus.CREATED).body("User registered");
     }
 
     @PostMapping("/login")
@@ -41,32 +40,19 @@ public class AuthController {
     public ResponseEntity<?> getCurrentUser(
             @AuthenticationPrincipal String userId
     ) {
-        if (userId == null) {
-            return ResponseEntity.status(401).body("Unauthorized");
+    		if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(authService.getUserByIdInternal(userId));
     }
     
     @PostMapping("/create-manager")
     public ResponseEntity<?> createServiceManager(
             @Valid @RequestBody RegisterRequest request
     ) {
-
-        User manager = User.builder()
-                .email(request.email())
-                .passwordHash(passwordEncoder.encode(request.password()))
-                .role(Role.SERVICE_MANAGER)
-                .active(true)
-                .createdAt(Instant.now())
-                .build();
-
-        userRepository.save(manager);
-
-        return ResponseEntity.ok("Service Manager created");
+    		authService.createServiceManager(request);
+        
+        return ResponseEntity.status(HttpStatus.CREATED).body("Service Manager created");
     }
 
 }
