@@ -43,28 +43,17 @@ public class TechnicianAssignmentController {
 	}
 
 	@PutMapping("/{assignmentId}/start")
-	public AssignmentResponse startAssignment(
-	        @PathVariable String assignmentId,
-	        Authentication authentication
-	) {
-	    String technicianUserId = authentication.getName();
+	public AssignmentResponse startAssignment(@PathVariable String assignmentId, Authentication authentication) {
+		String technicianUserId = authentication.getName();
 
-	    return assignmentService.startAssignment(
-	            assignmentId,
-	            technicianUserId
-	    );
+		return assignmentService.startAssignment(assignmentId, technicianUserId);
 	}
-	 @PutMapping("/{assignmentId}/complete")
-	    public AssignmentResponse completeAssignment(
-	            @PathVariable String assignmentId,
-		        Authentication authentication
-	    ) {
-		 	String technicianUserId = authentication.getName();
 
-	        return assignmentService.completeAssignment(
-		            assignmentId,
-		            technicianUserId
-		    );
-	    }
+	@PutMapping("/{assignmentId}/complete")
+	public AssignmentResponse completeAssignment(@PathVariable String assignmentId, Authentication authentication) {
+		String technicianUserId = authentication.getName();
+
+		return assignmentService.completeAssignment(assignmentId, technicianUserId);
+	}
 
 }

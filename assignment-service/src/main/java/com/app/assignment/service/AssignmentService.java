@@ -8,7 +8,6 @@ import com.app.assignment.dto.notification.NotificationEvent;
 import com.app.assignment.dto.notification.NotificationEventType;
 import com.app.assignment.dto.request.CreateAssignmentRequest;
 import com.app.assignment.dto.request.ReassignAssignmentRequest;
-import com.app.assignment.dto.request.TechnicianDto;
 import com.app.assignment.dto.response.AssignmentResponse;
 import com.app.assignment.exception.AssignmentNotFoundException;
 import com.app.assignment.exception.InvalidAssignmentStateException;

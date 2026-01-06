@@ -19,7 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.app.management.config.JwtUtil; // <--- 1. ADD THIS IMPORT
+import com.app.management.config.JwtUtil;
 import com.app.management.dto.request.CreateServiceRequest;
 import com.app.management.dto.request.ServiceCategoryRequest;
 import com.app.management.dto.request.UpdateServiceRequest;

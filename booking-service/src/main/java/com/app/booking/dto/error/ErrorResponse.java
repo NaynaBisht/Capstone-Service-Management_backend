@@ -1,6 +1,5 @@
 package com.app.booking.dto.error;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;

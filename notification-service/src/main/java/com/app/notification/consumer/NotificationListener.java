@@ -1,11 +1,11 @@
 package com.app.notification.consumer;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+
 import org.springframework.stereotype.Component;
 
 import com.app.notification.client.AuthServiceClient;
 import com.app.notification.dto.NotificationEvent;
-import com.app.notification.dto.NotificationEventType;
 import com.app.notification.service.EmailService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,23 +30,17 @@ public class NotificationListener {
 
 		switch (event.getEventType()) {
 
-		case BOOKING_CREATED -> 
-			emailService.sendBookingCreatedEmail(user.getEmail(), event.getData());
+		case BOOKING_CREATED -> emailService.sendBookingCreatedEmail(user.getEmail(), event.getData());
 
-		case BOOKING_RESCHEDULED -> 
-			emailService.sendBookingRescheduledEmail(user.getEmail(), event.getData());
+		case BOOKING_RESCHEDULED -> emailService.sendBookingRescheduledEmail(user.getEmail(), event.getData());
 
-		case BOOKING_CANCELLED -> 
-			emailService.sendBookingCancelledEmail(user.getEmail(), event.getData());
+		case BOOKING_CANCELLED -> emailService.sendBookingCancelledEmail(user.getEmail(), event.getData());
 
-		case ASSIGNMENT_ASSIGNED ->
-                emailService.sendTechnicianAssignedEmail(user.getEmail(), event.getData());
+		case ASSIGNMENT_ASSIGNED -> emailService.sendTechnicianAssignedEmail(user.getEmail(), event.getData());
 
-        case ASSIGNMENT_STARTED ->
-                emailService.sendAssignmentStartedEmail(user.getEmail(), event.getData());
+		case ASSIGNMENT_STARTED -> emailService.sendAssignmentStartedEmail(user.getEmail(), event.getData());
 
-        case ASSIGNMENT_COMPLETED ->
-                emailService.sendAssignmentCompletedEmail(user.getEmail(), event.getData());
+		case ASSIGNMENT_COMPLETED -> emailService.sendAssignmentCompletedEmail(user.getEmail(), event.getData());
 		}
 	}
 }

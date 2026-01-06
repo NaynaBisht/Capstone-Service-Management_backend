@@ -8,14 +8,10 @@ import io.jsonwebtoken.Jwts;
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret}")
-    private String secret;
+	@Value("${jwt.secret}")
+	private String secret;
 
-    public void validateToken(String token) {
-        Jwts.parserBuilder()
-                .setSigningKey(secret.getBytes())
-                .build()
-                .parseClaimsJws(token);
-    }
+	public void validateToken(String token) {
+		Jwts.parserBuilder().setSigningKey(secret.getBytes()).build().parseClaimsJws(token);
+	}
 }
-

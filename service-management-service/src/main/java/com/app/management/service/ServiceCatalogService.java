@@ -1,9 +1,7 @@
 package com.app.management.service;
 
 import org.springframework.stereotype.Service;
-
 import com.app.management.dto.request.CreateServiceRequest;
-import com.app.management.dto.request.ServiceCategoryRequest;
 import com.app.management.dto.request.UpdateServiceRequest;
 import com.app.management.dto.response.ServiceResponse;
 import com.app.management.model.ServiceCategory;
@@ -13,11 +11,8 @@ import com.app.management.repository.ServiceRepository;
 import lombok.RequiredArgsConstructor;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

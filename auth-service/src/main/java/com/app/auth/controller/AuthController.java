@@ -1,21 +1,16 @@
 package com.app.auth.controller;
 
 import com.app.auth.dto.request.LoginRequest;
+
 import com.app.auth.dto.request.RegisterRequest;
 import com.app.auth.dto.response.AuthResponse;
-import com.app.auth.model.Role;
-import com.app.auth.model.User;
-import com.app.auth.repository.UserRepository;
 import com.app.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-import java.time.Instant;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

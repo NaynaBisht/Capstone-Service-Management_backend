@@ -1,13 +1,12 @@
 package com.app.booking.service;
 
 import java.time.Duration;
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import org.springframework.security.access.AccessDeniedException;

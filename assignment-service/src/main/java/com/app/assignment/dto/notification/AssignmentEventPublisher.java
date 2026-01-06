@@ -1,6 +1,5 @@
 package com.app.assignment.dto.notification;
 
-import com.app.assignment.dto.notification.NotificationEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
