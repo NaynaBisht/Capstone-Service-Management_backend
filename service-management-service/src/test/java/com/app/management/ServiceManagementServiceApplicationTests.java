@@ -1,4 +1,4 @@
-package com.app.servicemgt;
+package com.app.management;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
