@@ -4,6 +4,8 @@ import java.time.*;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
 
 import lombok.*;
 
@@ -29,6 +31,7 @@ public class Booking {
     private String categoryId;
     private String categoryName; 
 
+    @Field(targetType = FieldType.STRING)
     private LocalDate scheduledDate;
 
     // Store exactly what UI sends

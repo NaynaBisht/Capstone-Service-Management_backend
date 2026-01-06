@@ -30,8 +30,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/bookings/*/reschedule").hasRole("CUSTOMER")
 
                 // ADMIN
-                .requestMatchers("/api/bookings").hasRole("ADMIN")
-                .requestMatchers("/api/bookings/history").hasRole("ADMIN")
+                .requestMatchers("/api/bookings").hasAnyRole("ADMIN", "SERVICE_MANAGER")
+                .requestMatchers("/api/bookings/history").hasAnyRole("ADMIN", "SERVICE_MANAGER")
 
                 // TECHNICIAN
                 .requestMatchers("/api/bookings/technician/**").hasRole("TECHNICIAN")

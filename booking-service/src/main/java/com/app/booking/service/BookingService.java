@@ -2,6 +2,7 @@ package com.app.booking.service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -175,98 +176,107 @@ public class BookingService {
                                 .toList();
         }
 
-        public RescheduleBookingResponse rescheduleBooking(String bookingId, String customerId,
-                        RescheduleBookingRequest request) {
+		public RescheduleBookingResponse rescheduleBooking(String bookingId, String customerId,
+				RescheduleBookingRequest request) {
 
-                Booking booking = bookingRepository.findByBookingId(bookingId)
-                                .orElseThrow(() -> new BookingNotFoundException(bookingId));
+			Booking booking = bookingRepository.findByBookingId(bookingId)
+					.orElseThrow(() -> new BookingNotFoundException(bookingId));
 
-                validateBookingOwnership(booking, customerId);
+			validateBookingOwnership(booking, customerId);
 
-                if (booking.getStatus() == BookingStatus.CANCELLED ||
-                                booking.getStatus() == BookingStatus.COMPLETED) {
-                        throw new BusinessValidationException(
-                                        "Booking cannot be rescheduled");
-                }
+			if (booking.getStatus() == BookingStatus.CANCELLED || booking.getStatus() == BookingStatus.COMPLETED) {
+				throw new BusinessValidationException("Booking cannot be rescheduled");
+			}
 
-                LocalDateTime newDateTime = LocalDateTime.of(
-                                request.getScheduledDate(),
-                                request.getTimeSlot().getStart());
+			if (booking.getStatus() == BookingStatus.IN_PROGRESS) {
+				throw new BusinessValidationException("Booking already in progress");
+			}
 
-                if (newDateTime.isBefore(LocalDateTime.now())) {
-                        throw new BusinessValidationException(
-                                        "Cannot reschedule to past date or time");
-                }
+			// Existing booking time
+			LocalDateTime currentBookingDateTime = LocalDateTime.of(booking.getScheduledDate(),
+					booking.getTimeSlot().getStart());
 
-                booking.setScheduledDate(request.getScheduledDate());
-                booking.setTimeSlot(request.getTimeSlot());
+			if (Duration.between(LocalDateTime.now(), currentBookingDateTime).toHours() < 24) {
+				throw new BusinessValidationException("Booking cannot be rescheduled within 24 hours of service time");
+			}
 
-                booking.setStatus(BookingStatus.RESCHEDULED);
-                bookingRepository.save(booking);
-                
-                NotificationEvent event = NotificationEvent.builder()
-                	    .eventType(NotificationEventType.BOOKING_RESCHEDULED)
-                	    .recipient(new NotificationEvent.Recipient(booking.getCustomerId()))
-                	    .data(Map.of(
-                	        "bookingId", booking.getBookingId(),
-                	        "serviceName", booking.getServiceName(),
-                	        "scheduledDate", booking.getScheduledDate(),
-                	        "timeSlot", booking.getTimeSlot()
-                	    ))
-                	    .timestamp(Instant.now())
-                	    .build();
+			// New requested time
+			LocalDateTime newDateTime = LocalDateTime.of(request.getScheduledDate(), request.getTimeSlot().getStart());
 
-                	bookingEventPublisher.publish(event);
+			if (newDateTime.isBefore(LocalDateTime.now())) {
+				throw new BusinessValidationException("Cannot reschedule to past date or time");
+			}
 
+			// Enforce booking window: tomorrow to next 3 days
+			LocalDate today = LocalDate.now();
+			if (request.getScheduledDate().isBefore(today.plusDays(1))
+					|| request.getScheduledDate().isAfter(today.plusDays(3))) {
+				throw new BusinessValidationException("Rescheduled date must be between tomorrow and the next 3 days");
+			}
 
-                return RescheduleBookingResponse.builder()
-                                .bookingId(bookingId)
-                                .status("RESCHEDULED")
-                                .message("Booking has been rescheduled")
-                                .build();
-        }
+			booking.setScheduledDate(request.getScheduledDate());
+			booking.setTimeSlot(request.getTimeSlot());
+			booking.setStatus(BookingStatus.RESCHEDULED);
+			bookingRepository.save(booking);
+
+			NotificationEvent event = NotificationEvent.builder().eventType(NotificationEventType.BOOKING_RESCHEDULED)
+					.recipient(new NotificationEvent.Recipient(booking.getCustomerId()))
+					.data(Map.of("bookingId", booking.getBookingId(), "serviceName", booking.getServiceName(),
+							"scheduledDate", booking.getScheduledDate(), "timeSlot", booking.getTimeSlot()))
+					.timestamp(Instant.now()).build();
+
+			bookingEventPublisher.publish(event);
+
+			return RescheduleBookingResponse.builder().bookingId(bookingId).status("RESCHEDULED")
+					.message("Booking has been rescheduled").build();
+		}
+
 
         public CancelBookingResponse cancelBooking(String bookingId, String customerId) {
 
-                Booking booking = bookingRepository.findByBookingId(bookingId)
-                                .orElseThrow(() -> new BookingNotFoundException(bookingId));
+            Booking booking = bookingRepository.findByBookingId(bookingId)
+                    .orElseThrow(() -> new BookingNotFoundException(bookingId));
 
-                validateBookingOwnership(booking, customerId);
+            validateBookingOwnership(booking, customerId);
 
-                if (booking.getStatus() == BookingStatus.CANCELLED ||
-                                booking.getStatus() == BookingStatus.COMPLETED) {
-                        throw new BusinessValidationException(
-                                        "Booking cannot be cancelled");
-                }
+            if (booking.getStatus() == BookingStatus.CANCELLED ||
+                booking.getStatus() == BookingStatus.COMPLETED) {
+                throw new BusinessValidationException("Booking cannot be cancelled");
+            }
 
-                LocalDateTime bookingDateTime = LocalDateTime.of(
-                                booking.getScheduledDate(),
-                                booking.getTimeSlot().getStart());
+            if (booking.getStatus() == BookingStatus.IN_PROGRESS) {
+                throw new BusinessValidationException("Booking already in progress");
+            }
 
-                if (Duration.between(LocalDateTime.now(), bookingDateTime).toHours() < 24) {
-                        throw new BusinessValidationException(
-                                        "Booking cannot be cancelled within 24 hours of service time");
-                }
+            LocalDateTime bookingDateTime = LocalDateTime.of(
+                    booking.getScheduledDate(),
+                    booking.getTimeSlot().getStart());
 
-                booking.setStatus(BookingStatus.CANCELLED);
-                bookingRepository.save(booking);
+            if (Duration.between(LocalDateTime.now(), bookingDateTime).toHours() < 24) {
+                throw new BusinessValidationException(
+                        "Booking cannot be cancelled within 24 hours of service time");
+            }
 
-                NotificationEvent event = NotificationEvent.builder()
-                	    .eventType(NotificationEventType.BOOKING_CANCELLED)
-                	    .recipient(new NotificationEvent.Recipient(booking.getCustomerId()))
-                	    .data(Map.of(
-                	        "bookingId", booking.getBookingId(),
-                	        "serviceName", booking.getServiceName()
-                	    ))
-                	    .timestamp(Instant.now())
-                	    .build();
+            booking.setStatus(BookingStatus.CANCELLED);
+            bookingRepository.save(booking);
 
-                	bookingEventPublisher.publish(event);
+            NotificationEvent event = NotificationEvent.builder()
+                .eventType(NotificationEventType.BOOKING_CANCELLED)
+                .recipient(new NotificationEvent.Recipient(booking.getCustomerId()))
+                .data(Map.of(
+                    "bookingId", booking.getBookingId(),
+                    "serviceName", booking.getServiceName()
+                ))
+                .timestamp(Instant.now())
+                .build();
 
-                return CancelBookingResponse.builder()
-                                .bookingId(bookingId)
-                                .status("CANCELLED")
-                                .message("Booking cancelled")
-                                .build();
+            bookingEventPublisher.publish(event);
+
+            return CancelBookingResponse.builder()
+                    .bookingId(bookingId)
+                    .status("CANCELLED")
+                    .message("Booking cancelled successfully")
+                    .build();
         }
+
 }
