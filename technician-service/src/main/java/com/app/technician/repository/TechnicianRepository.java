@@ -29,6 +29,12 @@ public interface TechnicianRepository extends MongoRepository<Technician, String
             AvailabilityStatus availability,
             SkillType skill
     );
+    
+    List<Technician> findByStatusAndAvailability(
+    	    TechnicianStatus status,
+    	    AvailabilityStatus availability
+    	);
+
 
 }
 

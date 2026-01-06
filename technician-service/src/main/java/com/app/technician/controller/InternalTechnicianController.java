@@ -1,6 +1,7 @@
 package com.app.technician.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,6 +35,18 @@ public class InternalTechnicianController {
                 .orElseThrow(() ->
                         new RuntimeException("No available technician found")
                 );
+
+        return new TechnicianAvailabilityResponse(
+                technician.getId(),
+                technician.getUserId()
+        );
+    }
+    @GetMapping("/{technicianId}")
+    public TechnicianAvailabilityResponse getTechnicianById(
+            @PathVariable String technicianId
+    ) {
+        Technician technician = technicianRepository.findById(technicianId)
+                .orElseThrow(() -> new RuntimeException("Technician not found with ID: " + technicianId));
 
         return new TechnicianAvailabilityResponse(
                 technician.getId(),

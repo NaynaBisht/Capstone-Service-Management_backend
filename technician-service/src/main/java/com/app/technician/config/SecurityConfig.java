@@ -20,7 +20,8 @@ public class SecurityConfig {
             	    .requestMatchers(
             	        "/api/technicians/onboard",
             	        "/api/technicians/**",
-            	        "/internal/**"
+            	        "/internal/**",
+            	        "/error"
             	    ).permitAll()
             	    .anyRequest().authenticated()
             	)

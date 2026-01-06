@@ -2,8 +2,11 @@ package com.app.technician.model;
 
 public enum SkillType {
 	PLUMBING,
-    ELECTRICIAN,
+	ELECTRICAL,
     CLEANING,
     SALON,
-    AC_SERVICE
+    AC,
+    APPLIANCE,
+    PEST_CONTROL,
+    CARPENTRY
 }
