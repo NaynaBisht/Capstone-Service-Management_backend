@@ -8,6 +8,7 @@ import com.app.assignment.dto.notification.NotificationEvent;
 import com.app.assignment.dto.notification.NotificationEventType;
 import com.app.assignment.dto.request.CreateAssignmentRequest;
 import com.app.assignment.dto.request.ReassignAssignmentRequest;
+import com.app.assignment.dto.request.TechnicianDto;
 import com.app.assignment.dto.response.AssignmentResponse;
 import com.app.assignment.exception.AssignmentNotFoundException;
 import com.app.assignment.exception.InvalidAssignmentStateException;
@@ -35,51 +36,49 @@ public class AssignmentService {
 
         public AssignmentResponse createAssignment(CreateAssignmentRequest request) {
 
-                String token = (String) org.springframework.security.core.context.SecurityContextHolder.getContext()
-                                .getAuthentication().getCredentials();
+			String token = (String) org.springframework.security.core.context.SecurityContextHolder.getContext()
+					.getAuthentication().getCredentials();
 
-                // 2. Pass Token to validateBooking (Update this line)
-                bookingServiceClient.validateBooking(request.getBookingId(), token);
+			// 1. Validate Booking
+			bookingServiceClient.validateBooking(request.getBookingId(), token);
 
-                // Fetch technician
-                TechnicianServiceClient.TechnicianDTO technician = technicianServiceClient
-                                .findAvailableTechnician(request.getServiceId());
+			// 2. Fetch Technician (CORRECTED LOGIC)
+			// We declare the variable here, but don't assign it yet
+			TechnicianServiceClient.TechnicianDTO technician; 
 
-                // Create Assignment
-                Assignment assignment = Assignment.builder()
-                                .assignmentId(UUID.randomUUID().toString())
-                                .bookingId(request.getBookingId())
-                                .technicianId(technician.getTechnicianId())
-                                .technicianUserId(technician.getUserId())
-                                .status(AssignmentStatus.PENDING)
-                                .attemptCount(0)
-                                .createdAt(Instant.now())
-                                .build();
+			if (request.getTechnicianId() != null && !request.getTechnicianId().isEmpty()) {
+			    technician = technicianServiceClient.getTechnicianById(request.getTechnicianId());
+			    } else {
+				// CASE B: No technician selected (Auto-Assign)
+				// If you still want this to work later, you need the "Enum Fix" we discussed.
+				// For now, we throw an error if no technician is selected to avoid the crash.
+				throw new RuntimeException("Please select a technician to proceed.");
+			}
 
-                assignmentRepository.save(assignment);
+			// 3. Create Assignment (Using the 'technician' variable we just set)
+			Assignment assignment = Assignment.builder().assignmentId(UUID.randomUUID().toString())
+					.bookingId(request.getBookingId()).technicianId(technician.getTechnicianId()) // Now uses the
+																									// correct
+																									// technician
+					.technicianUserId(technician.getUserId()).status(AssignmentStatus.PENDING).attemptCount(0)
+					.createdAt(Instant.now()).build();
 
-                NotificationEvent event = NotificationEvent.builder()
-                                .eventType(NotificationEventType.ASSIGNMENT_ASSIGNED)
-                                .recipient(new NotificationEvent.Recipient(
-                                                technician.getUserId()))
-                                .data(Map.of(
-                                                "assignmentId", assignment.getAssignmentId(),
-                                                "bookingId", assignment.getBookingId()))
-                                .timestamp(Instant.now())
-                                .build();
+			assignmentRepository.save(assignment);
 
-                assignmentEventPublisher.publish(event);
+			// 4. Send Notification
+			NotificationEvent event = NotificationEvent.builder().eventType(NotificationEventType.ASSIGNMENT_ASSIGNED)
+					.recipient(new NotificationEvent.Recipient(technician.getUserId()))
+					.data(Map.of("assignmentId", assignment.getAssignmentId(), "bookingId", assignment.getBookingId()))
+					.timestamp(Instant.now()).build();
 
-                // Response
-                return AssignmentResponse.builder()
-                                .assignmentId(assignment.getAssignmentId())
-                                .bookingId(assignment.getBookingId())
-                                .technicianId(assignment.getTechnicianId())
-                                .technicianUserId(assignment.getTechnicianUserId())
-                                .status(assignment.getStatus())
-                                .createdAt(assignment.getCreatedAt())
-                                .build();
-        }
+			assignmentEventPublisher.publish(event);
+
+			// 5. Return Response
+			return AssignmentResponse.builder().assignmentId(assignment.getAssignmentId())
+					.bookingId(assignment.getBookingId()).technicianId(assignment.getTechnicianId())
+					.technicianUserId(assignment.getTechnicianUserId()).status(assignment.getStatus())
+					.createdAt(assignment.getCreatedAt()).build();
+		}
 
         public List<AssignmentResponse> getMyAssignments(String technicianUserId) {
 

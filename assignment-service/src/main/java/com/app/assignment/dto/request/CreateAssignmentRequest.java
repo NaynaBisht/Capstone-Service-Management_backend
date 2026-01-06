@@ -15,6 +15,8 @@ public class CreateAssignmentRequest {
 
     @NotBlank(message = "serviceId must not be null or blank")
     private String serviceId;
+    
+    private String technicianId;
 
     @NotNull(message = "scheduledDate must not be null")
     @FutureOrPresent(message = "scheduledDate cannot be in the past")

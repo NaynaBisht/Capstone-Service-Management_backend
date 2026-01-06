@@ -24,6 +24,15 @@ public class TechnicianServiceClient {
                 .retrieve()
                 .body(TechnicianDTO.class);
     }
+    public TechnicianDTO getTechnicianById(String technicianId) {
+        return restClient
+                .get()
+                // Make sure your Technician Service has this endpoint. 
+                // If not, change this path to match your Controller (e.g. "/api/technicians/" + technicianId)
+                .uri(technicianServiceUrl + "/internal/technicians/" + technicianId) 
+                .retrieve()
+                .body(TechnicianDTO.class);
+    }
 
     @Data
     public static class TechnicianDTO {
