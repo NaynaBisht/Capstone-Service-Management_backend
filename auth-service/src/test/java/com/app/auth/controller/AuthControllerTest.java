@@ -3,8 +3,9 @@ package com.app.auth.controller;
 import com.app.auth.dto.request.LoginRequest;
 import com.app.auth.dto.request.RegisterRequest;
 import com.app.auth.dto.response.AuthResponse;
+import com.app.auth.dto.response.InternalUserResponse;
 import com.app.auth.service.AuthService;
-import com.app.auth.util.JwtUtil; // Import your JwtUtil
+import com.app.auth.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,67 +29,61 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
 // 1. Disable Eureka
-@WebMvcTest(controllers = AuthController.class, properties = {"eureka.client.enabled=false"})
+@WebMvcTest(controllers = AuthController.class, properties = { "eureka.client.enabled=false" })
 // 2. Disable Security Filters so 401 errors disappear
-@AutoConfigureMockMvc(addFilters = false) 
+@AutoConfigureMockMvc(addFilters = false)
 class AuthControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+	@Autowired
+	private MockMvc mockMvc;
 
-    @MockitoBean
-    private AuthService authService;
+	@MockitoBean
+	private AuthService authService;
 
-    // 3. Mock JwtUtil to fix the "NoSuchBeanDefinitionException"
-    @MockitoBean
-    private JwtUtil jwtUtil;
+	// 3. Mock JwtUtil to fix the "NoSuchBeanDefinitionException"
+	@MockitoBean
+	private JwtUtil jwtUtil;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+	@Autowired
+	private ObjectMapper objectMapper;
 
-    @Test
-    void register_success() throws Exception {
-        RegisterRequest request = new RegisterRequest("test@example.com", "password");
+	@Test
+	void register_success() throws Exception {
+		RegisterRequest request = new RegisterRequest("test@example.com", "password");
 
-        doNothing().when(authService).register(any(RegisterRequest.class));
+		doNothing().when(authService).register(any(RegisterRequest.class));
 
-        mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(content().string("User registered"));
-    }
+		mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request))).andExpect(status().isCreated())
+				.andExpect(content().string("User registered"));
+	}
 
-    @Test
-    void login_success() throws Exception {
-        LoginRequest request = new LoginRequest("test@example.com", "password");
-        AuthResponse response = new AuthResponse("jwt-token", "CUSTOMER");
+	@Test
+	void login_success() throws Exception {
+		LoginRequest request = new LoginRequest("test@example.com", "password");
+		AuthResponse response = new AuthResponse("jwt-token", "CUSTOMER");
 
-        when(authService.login(any(LoginRequest.class))).thenReturn(response);
+		when(authService.login(any(LoginRequest.class))).thenReturn(response);
 
-        mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").value("jwt-token"))
-                .andExpect(jsonPath("$.role").value("CUSTOMER"));
-    }
-    
-    @Test
-    void getCurrentUser_unauthorized() throws Exception {
-     
-    }
+		mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request))).andExpect(status().isOk())
+				.andExpect(jsonPath("$.token").value("jwt-token")).andExpect(jsonPath("$.role").value("CUSTOMER"));
+	}
 
-    @Test
-    void createServiceManager_success() throws Exception {
-        RegisterRequest request = new RegisterRequest("manager@example.com", "password");
+	@Test
+	void getCurrentUser_unauthorized() throws Exception {
+		// This exercises lines 38-40 in your source code where userId == null
+		mockMvc.perform(get("/api/auth/me")).andExpect(status().isUnauthorized());
+	}
 
-        doNothing().when(authService).createServiceManager(any(RegisterRequest.class));
+	@Test
+	void createServiceManager_success() throws Exception {
+		RegisterRequest request = new RegisterRequest("manager@example.com", "password");
 
-        mockMvc.perform(post("/api/auth/create-manager")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(content().string("Service Manager created"));
-    }
+		doNothing().when(authService).createServiceManager(any(RegisterRequest.class));
+
+		mockMvc.perform(post("/api/auth/create-manager").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request))).andExpect(status().isCreated())
+				.andExpect(content().string("Service Manager created"));
+	}
 }
