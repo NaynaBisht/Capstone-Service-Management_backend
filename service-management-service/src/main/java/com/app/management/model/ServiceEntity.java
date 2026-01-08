@@ -21,7 +21,7 @@ public class ServiceEntity {
     @Id
     private String id;
 
-    private String name;               // Plumber
+    private String name;              
     private String description;
 
     private List<ServiceCategory> categories;

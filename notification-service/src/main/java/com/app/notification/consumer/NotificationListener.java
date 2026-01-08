@@ -41,6 +41,9 @@ public class NotificationListener {
 		case ASSIGNMENT_STARTED -> emailService.sendAssignmentStartedEmail(user.getEmail(), event.getData());
 
 		case ASSIGNMENT_COMPLETED -> emailService.sendAssignmentCompletedEmail(user.getEmail(), event.getData());
+		
+		case TECHNICIAN_APPROVED -> emailService.sendTechnicianApprovedEmail(user.getEmail(), event.getData());
+
 		}
 	}
 }

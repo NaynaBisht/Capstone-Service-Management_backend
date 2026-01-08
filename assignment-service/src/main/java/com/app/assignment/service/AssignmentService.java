@@ -17,6 +17,9 @@ import com.app.assignment.model.AssignmentStatus;
 import com.app.assignment.repository.AssignmentRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.amqp.AmqpException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -24,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AssignmentService {
@@ -69,8 +73,12 @@ public class AssignmentService {
 					.recipient(new NotificationEvent.Recipient(technician.getUserId()))
 					.data(Map.of("assignmentId", assignment.getAssignmentId(), "bookingId", assignment.getBookingId()))
 					.timestamp(Instant.now()).build();
-
-			assignmentEventPublisher.publish(event);
+			
+			try {
+				assignmentEventPublisher.publish(event);
+            } catch (AmqpException e) {
+                log.warn("RabbitMQ not available. Skipping notification", e);
+            }
 
 			// 5. Return Response
 			return AssignmentResponse.builder().assignmentId(assignment.getAssignmentId())
@@ -217,7 +225,11 @@ public class AssignmentService {
                                 .timestamp(Instant.now())
                                 .build();
 
-                assignmentEventPublisher.publish(event);
+                try {
+                	assignmentEventPublisher.publish(event);
+                } catch (AmqpException e) {
+                    log.warn("RabbitMQ not available. Skipping notification", e);
+                }
 
                 return AssignmentResponse.builder()
                                 .assignmentId(saved.getAssignmentId())
@@ -272,8 +284,12 @@ public class AssignmentService {
                                                                 : "Unknown Service"))
                                 .timestamp(Instant.now())
                                 .build();
-
-                assignmentEventPublisher.publish(event);
+                
+                try {
+                	assignmentEventPublisher.publish(event);
+                } catch (AmqpException e) {
+                    log.warn("RabbitMQ not available. Skipping notification", e);
+                }
 
                 return AssignmentResponse.builder()
                                 .assignmentId(saved.getAssignmentId())

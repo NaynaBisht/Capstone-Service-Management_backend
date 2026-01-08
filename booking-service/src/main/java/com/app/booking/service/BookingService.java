@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.amqp.AmqpException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +30,9 @@ import com.app.booking.model.BookingStatus;
 import com.app.booking.repository.BookingRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BookingService {
@@ -82,7 +85,13 @@ public class BookingService {
                 	    .timestamp(Instant.now())
                 	    .build();
 
-                	bookingEventPublisher.publish(event);
+                	
+                	try {
+                		bookingEventPublisher.publish(event);
+                	} catch (AmqpException e) {
+                        log.warn("RabbitMQ not available. Skipping notification", e);
+                    }
+
 
                 return BookingResponse.builder()
                                 .bookingId(booking.getBookingId())
@@ -224,7 +233,12 @@ public class BookingService {
 							"scheduledDate", booking.getScheduledDate(), "timeSlot", booking.getTimeSlot()))
 					.timestamp(Instant.now()).build();
 
-			bookingEventPublisher.publish(event);
+			try {
+				bookingEventPublisher.publish(event);
+			} catch (AmqpException e) {
+                log.warn("RabbitMQ not available. Skipping notification", e);
+            }
+
 
 			return RescheduleBookingResponse.builder().bookingId(bookingId).status("RESCHEDULED")
 					.message("Booking has been rescheduled").build();
@@ -269,12 +283,16 @@ public class BookingService {
                 .timestamp(Instant.now())
                 .build();
 
-            bookingEventPublisher.publish(event);
-
+            try {
+                bookingEventPublisher.publish(event);
+            } catch (AmqpException e) {
+                log.warn("RabbitMQ not available. Skipping notification", e);
+            }
+            
             return CancelBookingResponse.builder()
                     .bookingId(bookingId)
                     .status("CANCELLED")
-                    .message("Booking cancelled successfully")
+                    .message("Booking cancelled")
                     .build();
         }
 

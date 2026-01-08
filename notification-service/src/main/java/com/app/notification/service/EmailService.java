@@ -131,4 +131,34 @@ public class EmailService {
         mailSender.send(message);
         log.info("Assignment completed email sent to {}", to);
     }
+    
+    public void sendTechnicianApprovedEmail(String to, Map<String, Object> data) {
+
+        String name = (String) data.get("name");
+        String tempPassword = (String) data.get("temporaryPassword");
+
+        String subject = "Your NexaHome Technician Account is Approved";
+
+        String body = """
+            Hello %s,
+
+            Congratulations! Your technician account has been approved.
+
+            You can now log in using the following temporary password:
+
+            Temporary Password: %s
+
+            Please change your password after your first login.
+
+            Regards,
+            NexaHome Team
+            """.formatted(name, tempPassword);
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(body);
+
+        mailSender.send(message);
+    }
 }
