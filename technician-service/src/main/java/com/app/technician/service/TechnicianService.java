@@ -2,6 +2,9 @@ package com.app.technician.service;
 
 import com.app.technician.client.AuthServiceClient;
 import com.app.technician.dto.auth.CreateTechnicianUserResponse;
+import com.app.technician.dto.notification.NotificationEvent;
+import com.app.technician.dto.notification.NotificationEventPublisher;
+import com.app.technician.dto.notification.NotificationEventType;
 import com.app.technician.dto.request.TechnicianOnboardRequest;
 import com.app.technician.dto.response.ApproveTechnicianResponse;
 import com.app.technician.dto.response.TechnicianOnboardResponse;
@@ -11,19 +14,26 @@ import com.app.technician.model.Technician;
 import com.app.technician.model.TechnicianStatus;
 import com.app.technician.repository.TechnicianRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.amqp.AmqpException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TechnicianService {
 
         private final TechnicianRepository technicianRepository;
         private final AuthServiceClient authServiceClient;
+        private final NotificationEventPublisher notificationEventPublisher;
 
         public TechnicianOnboardResponse onboardTechnician(
                         TechnicianOnboardRequest request) {
@@ -109,6 +119,24 @@ public class TechnicianService {
 
                 technicianRepository.save(technician);
 
+                Map<String, Object> data = new HashMap<>();
+                data.put("name", technician.getName());
+                data.put("email", technician.getEmail());
+                data.put("temporaryPassword", authResponse.getTemporaryPassword());
+
+                NotificationEvent event = new NotificationEvent(
+                        NotificationEventType.TECHNICIAN_APPROVED,
+                        new NotificationEvent.Recipient(authResponse.getUserId()),
+                        data,
+                        Instant.now()
+                );
+
+                try {
+                	notificationEventPublisher.publish(event);
+                } catch (AmqpException e) {
+                    log.warn("RabbitMQ not available. Skipping notification", e);
+                }
+                
                 return ApproveTechnicianResponse.builder()
                         .technicianId(technician.getId())
                         .userId(authResponse.getUserId())

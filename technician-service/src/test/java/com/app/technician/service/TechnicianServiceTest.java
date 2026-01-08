@@ -2,6 +2,8 @@ package com.app.technician.service;
 
 import com.app.technician.client.AuthServiceClient;
 import com.app.technician.dto.auth.CreateTechnicianUserResponse;
+import com.app.technician.dto.notification.NotificationEvent;
+import com.app.technician.dto.notification.NotificationEventPublisher;
 import com.app.technician.dto.request.TechnicianOnboardRequest;
 import com.app.technician.dto.response.ApproveTechnicianResponse;
 import com.app.technician.dto.response.TechnicianOnboardResponse;
@@ -32,6 +34,9 @@ class TechnicianServiceTest {
 
     @Mock
     private AuthServiceClient authServiceClient;
+    
+    @Mock
+    private NotificationEventPublisher notificationEventPublisher;
 
     @InjectMocks
     private TechnicianService technicianService;
@@ -151,7 +156,7 @@ class TechnicianServiceTest {
 
     @Test
     void testApproveTechnician_Success() {
-        // Mock Auth Response
+        
         CreateTechnicianUserResponse authResponse = new CreateTechnicianUserResponse();
         authResponse.setUserId("user-001");
         authResponse.setTemporaryPassword("temp-pass");
@@ -165,7 +170,9 @@ class TechnicianServiceTest {
         assertEquals("user-001", technician.getUserId());
         assertEquals(AvailabilityStatus.AVAILABLE, technician.getAvailability());
         assertEquals("temp-pass", response.getTemporaryPassword());
+        
         verify(technicianRepository).save(technician);
+        verify(notificationEventPublisher).publish(any(NotificationEvent.class));
     }
 
     @Test
