@@ -13,9 +13,9 @@ public class CreateAssignmentRequest {
     @NotBlank(message = "bookingId must not be null or blank")
     private String bookingId;
 
-    @NotBlank(message = "serviceId must not be null or blank")
-    private String serviceId;
-    
+    @NotBlank(message = "categoryId must not be null or blank")
+    private String categoryId;
+
     private String technicianId;
 
     @NotNull(message = "scheduledDate must not be null")

@@ -11,6 +11,7 @@ import com.app.auth.dto.response.CreateTechnicianUserResponse;
 import com.app.auth.dto.response.InternalUserResponse;
 import com.app.auth.service.AuthService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -21,7 +22,7 @@ public class InternalAuthController {
 
     @PostMapping("/internal/auth/users")
     public CreateTechnicianUserResponse createTechnicianUser(
-            @RequestBody CreateTechnicianUserRequest request
+    		@Valid @RequestBody CreateTechnicianUserRequest request
     ) {
         return authService.createTechnicianUser(request);
     }

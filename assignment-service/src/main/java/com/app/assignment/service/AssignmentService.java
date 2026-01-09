@@ -39,53 +39,46 @@ public class AssignmentService {
 
         public AssignmentResponse createAssignment(CreateAssignmentRequest request) {
 
-			String token = (String) org.springframework.security.core.context.SecurityContextHolder.getContext()
-					.getAuthentication().getCredentials();
+                String token = (String) org.springframework.security.core.context.SecurityContextHolder.getContext()
+                                .getAuthentication().getCredentials();
 
-			// 1. Validate Booking
-			bookingServiceClient.validateBooking(request.getBookingId(), token);
+                bookingServiceClient.validateBooking(request.getBookingId(), token);
 
-			// 2. Fetch Technician (CORRECTED LOGIC)
-			// We declare the variable here, but don't assign it yet
-			TechnicianServiceClient.TechnicianDTO technician; 
+                TechnicianServiceClient.TechnicianDTO technician;
 
-			if (request.getTechnicianId() != null && !request.getTechnicianId().isEmpty()) {
-			    technician = technicianServiceClient.getTechnicianById(request.getTechnicianId());
-			    } else {
-				// CASE B: No technician selected (Auto-Assign)
-				// If you still want this to work later, you need the "Enum Fix" we discussed.
-				// For now, we throw an error if no technician is selected to avoid the crash.
-				throw new RuntimeException("Please select a technician to proceed.");
-			}
+                if (request.getTechnicianId() != null && !request.getTechnicianId().isEmpty()) {
+                        technician = technicianServiceClient.getTechnicianById(request.getTechnicianId());
+                } else {
+                         throw new RuntimeException("Please select a technician to proceed.");
+                }
 
-			// 3. Create Assignment (Using the 'technician' variable we just set)
-			Assignment assignment = Assignment.builder().assignmentId(UUID.randomUUID().toString())
-					.bookingId(request.getBookingId()).technicianId(technician.getTechnicianId()) // Now uses the
-																									// correct
-																									// technician
-					.technicianUserId(technician.getUserId()).status(AssignmentStatus.PENDING).attemptCount(0)
-					.createdAt(Instant.now()).build();
+                Assignment assignment = Assignment.builder().assignmentId(UUID.randomUUID().toString())
+                                .bookingId(request.getBookingId()).technicianId(technician.getTechnicianId())
+                                .technicianUserId(technician.getUserId()).status(AssignmentStatus.PENDING)
+                                .attemptCount(0)
+                                .createdAt(Instant.now()).build();
 
-			assignmentRepository.save(assignment);
+                assignmentRepository.save(assignment);
 
-			// 4. Send Notification
-			NotificationEvent event = NotificationEvent.builder().eventType(NotificationEventType.ASSIGNMENT_ASSIGNED)
-					.recipient(new NotificationEvent.Recipient(technician.getUserId()))
-					.data(Map.of("assignmentId", assignment.getAssignmentId(), "bookingId", assignment.getBookingId()))
-					.timestamp(Instant.now()).build();
-			
-			try {
-				assignmentEventPublisher.publish(event);
-            } catch (AmqpException e) {
-                log.warn("RabbitMQ not available. Skipping notification", e);
-            }
+                NotificationEvent event = NotificationEvent.builder()
+                                .eventType(NotificationEventType.ASSIGNMENT_ASSIGNED)
+                                .recipient(new NotificationEvent.Recipient(technician.getUserId()))
+                                .data(Map.of("assignmentId", assignment.getAssignmentId(), "bookingId",
+                                                assignment.getBookingId()))
+                                .timestamp(Instant.now()).build();
 
-			// 5. Return Response
-			return AssignmentResponse.builder().assignmentId(assignment.getAssignmentId())
-					.bookingId(assignment.getBookingId()).technicianId(assignment.getTechnicianId())
-					.technicianUserId(assignment.getTechnicianUserId()).status(assignment.getStatus())
-					.createdAt(assignment.getCreatedAt()).build();
-		}
+                try {
+                        assignmentEventPublisher.publish(event);
+                } catch (AmqpException e) {
+                        log.warn("RabbitMQ not available. Skipping notification", e);
+                }
+
+                // 5. Return Response
+                return AssignmentResponse.builder().assignmentId(assignment.getAssignmentId())
+                                .bookingId(assignment.getBookingId()).technicianId(assignment.getTechnicianId())
+                                .technicianUserId(assignment.getTechnicianUserId()).status(assignment.getStatus())
+                                .createdAt(assignment.getCreatedAt()).build();
+        }
 
         public List<AssignmentResponse> getMyAssignments(String technicianUserId) {
 
@@ -204,6 +197,8 @@ public class AssignmentService {
                 BookingServiceClient.BookingDTO booking = bookingServiceClient.getBooking(assignment.getBookingId(),
                                 token);
 
+                String categoryId = booking.getCategoryId();
+
                 // State transition
                 assignment.setStatus(AssignmentStatus.IN_PROGRESS);
                 assignment.setStartedAt(Instant.now());
@@ -226,9 +221,9 @@ public class AssignmentService {
                                 .build();
 
                 try {
-                	assignmentEventPublisher.publish(event);
+                        assignmentEventPublisher.publish(event);
                 } catch (AmqpException e) {
-                    log.warn("RabbitMQ not available. Skipping notification", e);
+                        log.warn("RabbitMQ not available. Skipping notification", e);
                 }
 
                 return AssignmentResponse.builder()
@@ -265,6 +260,9 @@ public class AssignmentService {
 
                 BookingServiceClient.BookingDTO booking = bookingServiceClient.getBooking(assignment.getBookingId(),
                                 token);
+
+                String categoryId = booking.getCategoryId();
+                
                 // State transition
                 assignment.setStatus(AssignmentStatus.COMPLETED);
                 assignment.setCompletedAt(Instant.now());
@@ -284,11 +282,11 @@ public class AssignmentService {
                                                                 : "Unknown Service"))
                                 .timestamp(Instant.now())
                                 .build();
-                
+
                 try {
-                	assignmentEventPublisher.publish(event);
+                        assignmentEventPublisher.publish(event);
                 } catch (AmqpException e) {
-                    log.warn("RabbitMQ not available. Skipping notification", e);
+                        log.warn("RabbitMQ not available. Skipping notification", e);
                 }
 
                 return AssignmentResponse.builder()

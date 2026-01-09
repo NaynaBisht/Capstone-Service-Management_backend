@@ -34,5 +34,7 @@ public class BookingServiceClient {
 		private String customerId;
 		private String customerEmail;
 		private String serviceName;
+		private String categoryId;
+    	private String categoryName;
 	}
 }

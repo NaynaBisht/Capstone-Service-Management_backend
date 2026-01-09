@@ -16,6 +16,9 @@ public class AssignmentEventPublisher {
     @Value("${notification.exchange}")
     private String exchange;
 
+    @Value("${notification.routing-key}")
+    private String routingKey;
+    
     public void publish(NotificationEvent event) {
         rabbitTemplate.convertAndSend(exchange, "notification.event", event);
 

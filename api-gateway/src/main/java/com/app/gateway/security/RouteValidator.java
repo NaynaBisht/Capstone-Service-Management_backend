@@ -12,6 +12,7 @@ public class RouteValidator {
     private static final List<String> openEndpoints = List.of(
             "/auth/login",
             "/auth/register",
+            "/api/services",
             "/auth/refresh",
             "/actuator/health"
     );
