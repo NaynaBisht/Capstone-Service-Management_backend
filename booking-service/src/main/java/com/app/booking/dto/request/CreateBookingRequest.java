@@ -1,8 +1,10 @@
 package com.app.booking.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -30,7 +32,6 @@ public class CreateBookingRequest {
 	@NotBlank(message = "Category ID is required")
 	private String categoryId;
 
-	@NotBlank(message = "Category name is required")
 	private String categoryName;
 
 	// Schedule
@@ -48,6 +49,7 @@ public class CreateBookingRequest {
 
 	// Problem description
 	@NotBlank(message = "Issue description is required")
+	@Size(min = 10, max = 500, message = "Issue description must be between 10 and 500 characters")
 	private String issueDescription;
 
 	// Payment

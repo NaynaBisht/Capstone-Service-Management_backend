@@ -12,5 +12,8 @@ class BookingServiceApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
+	@Test
+    void mainMethodRunsWithoutException() {
+		BookingServiceApplication.main(new String[] {});
+    }
 }

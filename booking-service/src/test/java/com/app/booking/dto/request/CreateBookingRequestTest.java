@@ -64,7 +64,7 @@ class CreateBookingRequestTest {
         assertFalse(violations.isEmpty());
         // We expect violations for: serviceId, serviceName, categoryId, categoryName, scheduledDate, timeSlot, address, issueDescription, paymentMode
         // Just checking size > 0 is usually enough, but checking strictly:
-        assertTrue(violations.size() >= 9, "Should fail on all @NotNull/@NotBlank fields");
+        assertTrue(violations.size() >= 8, "Should fail on all required fields");
     }
 
     @Test

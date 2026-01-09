@@ -79,34 +79,44 @@ class BookingControllerTest {
     }
 
     @Test
-    void createBooking_Success() throws Exception {
-        CreateBookingRequest request = CreateBookingRequest.builder()
-                .serviceId("srv-01")
-                .serviceName("Cleaning")
-                .categoryId("cat-01")
-                .categoryName("Home")
-                .scheduledDate(LocalDate.now().plusDays(1)) 
-                .timeSlot(TimeSlot.SLOT_9_11) 
-                .address(new Address()) 
-                .issueDescription("Dusty")
-                .paymentMode(PaymentMode.CASH)
-                .build();
+	void createBooking_Success() throws Exception {
+	
+	    Address address = Address.builder()
+	            .addressLine1("Sector 10, Block A")
+	            .city("Delhi")
+	            .state("Delhi")
+	            .zipCode("110001")
+	            .build();
+	
+	    CreateBookingRequest request = CreateBookingRequest.builder()
+	            .serviceId("srv-01")
+	            .serviceName("Cleaning")
+	            .categoryId("cat-01")
+	            .categoryName("Home")
+	            .scheduledDate(LocalDate.now().plusDays(1))
+	            .timeSlot(TimeSlot.SLOT_9_11)
+	            .address(address)
+	            .issueDescription("Heavy dust in all rooms")  
+	            .paymentMode(PaymentMode.CASH)
+	            .build();
+	
+	    BookingResponse response = BookingResponse.builder()
+	            .bookingId("BK-123")
+	            .status("CONFIRMED")
+	            .build();
+	
+	    given(bookingService.createBooking(any(CreateBookingRequest.class), eq(CUSTOMER_ID)))
+	            .willReturn(response);
+	
+	    mockMvc.perform(post("/api/bookings")
+	            .contentType(MediaType.APPLICATION_JSON)
+	            .content(objectMapper.writeValueAsString(request)))
+	            .andExpect(status().isCreated())
+	            .andExpect(jsonPath("$.bookingId").value("BK-123"))
+	            .andExpect(jsonPath("$.status").value("CONFIRMED"));
+	}
 
-        BookingResponse response = BookingResponse.builder()
-                .bookingId("BK-123")
-                .status("CONFIRMED")
-                .build();
 
-        given(bookingService.createBooking(any(CreateBookingRequest.class), eq(CUSTOMER_ID)))
-                .willReturn(response);
-
-        mockMvc.perform(post("/api/bookings")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.bookingId").value("BK-123"))
-                .andExpect(jsonPath("$.status").value("CONFIRMED"));
-    }
 
     @Test
     void createBooking_ValidationFailure() throws Exception {
