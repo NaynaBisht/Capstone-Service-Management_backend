@@ -160,5 +160,6 @@ public class EmailService {
         message.setText(body);
 
         mailSender.send(message);
+        log.info("SUCCESS: Technician approval email sent to {}", to);
     }
 }

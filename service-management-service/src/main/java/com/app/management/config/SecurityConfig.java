@@ -21,13 +21,18 @@ public class SecurityConfig {
 
 		http.csrf(csrf -> csrf.disable())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.POST, "/api/services")
-						.hasAuthority("ROLE_ADMIN").requestMatchers(HttpMethod.PUT, "/api/services/**")
-						.hasAuthority("ROLE_ADMIN")
+				.authorizeHttpRequests(auth -> auth
+						
+						// ADMIN & SERVICE_MANAGER can CREATE services
+		                .requestMatchers(HttpMethod.POST, "/api/services")
+		                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SERVICE_MANAGER")
 
-						.requestMatchers(HttpMethod.GET, "/api/services/**")
-						.hasAnyAuthority("ROLE_CUSTOMER", "ROLE_TECHNICIAN", "ROLE_ADMIN", "ROLE_SERVICE_MANAGER")
+		                // ADMIN & SERVICE_MANAGER can UPDATE services
+		                .requestMatchers(HttpMethod.PUT, "/api/services/**")
+		                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SERVICE_MANAGER")
 
+						.requestMatchers(HttpMethod.GET, "/api/services").permitAll()
+						
 						.anyRequest().authenticated())
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
