@@ -1,7 +1,6 @@
 package com.app.technician.repository;
 
 import com.app.technician.model.AvailabilityStatus;
-import com.app.technician.model.SkillType;
 import com.app.technician.model.Technician;
 import com.app.technician.model.TechnicianStatus;
 import org.junit.jupiter.api.AfterEach;
@@ -37,7 +36,7 @@ class TechnicianRepositoryTest {
                 .city("New York")
                 .status(TechnicianStatus.APPROVED)
                 .availability(AvailabilityStatus.AVAILABLE)
-                .skills(List.of(SkillType.PLUMBING))
+                .skillCategoryIds(List.of("CAT_PLUMBING"))
                 .build();
 
         // Create Unavailable/Pending Technician
@@ -47,7 +46,7 @@ class TechnicianRepositoryTest {
                 .city("New York")
                 .status(TechnicianStatus.PENDING)
                 .availability(AvailabilityStatus.UNAVAILABLE)
-                .skills(List.of(SkillType.ELECTRICAL))
+                .skillCategoryIds(List.of("CAT_ELECTRICAL"))
                 .build();
 
         technicianRepository.saveAll(List.of(tech1, tech2));
@@ -92,12 +91,12 @@ class TechnicianRepositoryTest {
     }
 
     @Test
-    void testFindFirstByStatusAndAvailabilityAndSkillsContaining() {
+    void testFindFirstByStatusAndAvailabilityAndSkillCategoryIdsContaining() {
         // This tests the complex custom query for skills
-        Optional<Technician> result = technicianRepository.findFirstByStatusAndAvailabilityAndSkillsContaining(
+        Optional<Technician> result = technicianRepository.findFirstByStatusAndAvailabilityAndSkillCategoryIdsContaining(
                 TechnicianStatus.APPROVED,
                 AvailabilityStatus.AVAILABLE,
-                SkillType.PLUMBING
+                "CAT_PLUMBING"
         );
 
         assertTrue(result.isPresent());
@@ -106,10 +105,10 @@ class TechnicianRepositoryTest {
 
     @Test
     void testFindFirstByStatusAndAvailabilityAndSkillsContaining_NotFound() {
-        Optional<Technician> result = technicianRepository.findFirstByStatusAndAvailabilityAndSkillsContaining(
+        Optional<Technician> result = technicianRepository.findFirstByStatusAndAvailabilityAndSkillCategoryIdsContaining(
                 TechnicianStatus.APPROVED,
                 AvailabilityStatus.AVAILABLE,
-                SkillType.CARPENTRY // No tech has this skill
+                "CAT_PAINTING" // No tech has this skill
         );
 
         assertTrue(result.isEmpty());

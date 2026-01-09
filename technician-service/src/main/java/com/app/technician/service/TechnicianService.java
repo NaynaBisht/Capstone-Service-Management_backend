@@ -1,6 +1,7 @@
 package com.app.technician.service;
 
 import com.app.technician.client.AuthServiceClient;
+
 import com.app.technician.dto.auth.CreateTechnicianUserResponse;
 import com.app.technician.dto.notification.NotificationEvent;
 import com.app.technician.dto.notification.NotificationEventPublisher;
@@ -9,7 +10,6 @@ import com.app.technician.dto.request.TechnicianOnboardRequest;
 import com.app.technician.dto.response.ApproveTechnicianResponse;
 import com.app.technician.dto.response.TechnicianOnboardResponse;
 import com.app.technician.model.AvailabilityStatus;
-import com.app.technician.model.SkillType;
 import com.app.technician.model.Technician;
 import com.app.technician.model.TechnicianStatus;
 import com.app.technician.repository.TechnicianRepository;
@@ -50,7 +50,7 @@ public class TechnicianService {
                                 .email(request.getEmail())
                                 .phone(request.getPhone())
                                 .city(request.getCity())
-                                .skills(request.getSkills())
+                                .skillCategoryIds(request.getSkillCategoryIds())
                                 .experienceYears(request.getExperienceYears())
                                 .documents(new HashMap<>())
                                 .status(TechnicianStatus.PENDING)
@@ -132,9 +132,10 @@ public class TechnicianService {
                 );
 
                 try {
-                	notificationEventPublisher.publish(event);
-                } catch (AmqpException e) {
-                    log.warn("RabbitMQ not available. Skipping notification", e);
+                    log.info("Calling publisher for technician: {}", technician.getId());
+                    notificationEventPublisher.publish(event);
+                } catch (Exception e) { // Catch all exceptions, not just AmqpException
+                    log.error("CRITICAL ERROR during approval notification: ", e);
                 }
                 
                 return ApproveTechnicianResponse.builder()
@@ -182,7 +183,7 @@ public class TechnicianService {
         }
 
         public List<Technician> searchTechnicians(
-                        SkillType skill,
+        				String categoryId,
                         String city,
                         AvailabilityStatus availability,
                         TechnicianStatus status) {
@@ -193,10 +194,11 @@ public class TechnicianService {
                                 availability);
 
                 // Filter by skill (Mongo array contains)
-                if (skill != null) {
-                        technicians = technicians.stream()
-                                        .filter(t -> t.getSkills().contains(skill))
-                                        .toList();
+                if (categoryId != null && !categoryId.isEmpty()) {
+                    technicians = technicians.stream()
+                            .filter(t -> t.getSkillCategoryIds() != null
+                                    && t.getSkillCategoryIds().contains(categoryId))
+                            .toList();
                 }
 
                 return technicians;

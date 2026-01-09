@@ -29,7 +29,7 @@ public class Technician {
     private String phone;
     private String city;
 
-    private List<SkillType> skills;
+    private List<String> skillCategoryIds;
 
     private Map<String, String> documents;
 

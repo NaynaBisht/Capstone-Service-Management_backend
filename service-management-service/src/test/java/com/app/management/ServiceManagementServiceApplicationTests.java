@@ -1,6 +1,7 @@
 package com.app.management;
 
 import org.junit.jupiter.api.Test;
+
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(properties = {
@@ -12,5 +13,8 @@ class ServiceManagementServiceApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
+	@Test
+    void mainMethodRunsWithoutException() {
+		ServiceManagementServiceApplication.main(new String[] {});
+    }
 }

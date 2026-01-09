@@ -2,8 +2,6 @@ package com.app.technician.dto.request;
 
 import java.util.List;
 
-import com.app.technician.model.SkillType;
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -32,7 +30,7 @@ public class TechnicianOnboardRequest {
     private String city;
 
     @NotEmpty(message = "At least one skill is required")
-    private List<SkillType> skills;
+    private List<String> skillCategoryIds;
 
     @NotNull(message = "Experience years is required")
     @Min(value = 0, message = "Experience cannot be negative")

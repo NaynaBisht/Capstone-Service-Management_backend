@@ -1,13 +1,13 @@
 package com.app.technician.controller;
 
 import com.app.technician.dto.request.RejectTechnicianRequest;
+
 import com.app.technician.dto.request.TechnicianOnboardRequest;
 import com.app.technician.dto.request.UpdateAvailabilityRequest;
 import com.app.technician.dto.response.AllTechnicians;
 import com.app.technician.dto.response.ApproveTechnicianResponse;
 import com.app.technician.dto.response.TechnicianOnboardResponse;
 import com.app.technician.model.AvailabilityStatus;
-import com.app.technician.model.SkillType;
 import com.app.technician.model.Technician;
 import com.app.technician.model.TechnicianStatus;
 import com.app.technician.repository.TechnicianRepository;
@@ -85,7 +85,7 @@ public class TechnicianController {
                                                 t.getId(),
                                                 t.getUserId(),
                                                 t.getName(),
-                                                Set.copyOf(t.getSkills()),
+                                                Set.copyOf(t.getSkillCategoryIds()),
                                                 t.getCity(),
                                                 t.getExperienceYears()))
                                 .toList();
@@ -93,12 +93,12 @@ public class TechnicianController {
 
         @GetMapping("/search")
         public List<Technician> searchTechnicians(
-                        @RequestParam SkillType skill,
+                        @RequestParam String categoryId,
                         @RequestParam String city,
                         @RequestParam AvailabilityStatus availability,
                         @RequestParam TechnicianStatus status) {
                 return technicianService.searchTechnicians(
-                                skill,
+                				categoryId,
                                 city,
                                 availability,
                                 status);
