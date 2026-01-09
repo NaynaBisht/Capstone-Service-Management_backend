@@ -1,3 +1,4 @@
+version: "3.8"
 
 services:
 
@@ -10,6 +11,11 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -54,8 +60,10 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
-      - eureka-server
-      - mongodb
+      mongodb:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
 
   # -------------------- BOOKING SERVICE --------------------
 
@@ -69,9 +77,12 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
-      - eureka-server
-      - mongodb
-      - rabbitmq
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      eureka-server:
+        condition: service_started
 
   # -------------------- ASSIGNMENT SERVICE --------------------
 
@@ -85,11 +96,16 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
-      - eureka-server
-      - mongodb
-      - rabbitmq
-      - booking-service
-      - technician-service
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      booking-service:
+        condition: service_started
+      technician-service:
+        condition: service_started
+      eureka-server:
+        condition: service_started
 
   # -------------------- SERVICE MANAGEMENT --------------------
 
@@ -103,8 +119,10 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
-      - eureka-server
-      - mongodb
+      mongodb:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
 
   # -------------------- TECHNICIAN SERVICE --------------------
 
@@ -118,8 +136,10 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
-      - eureka-server
-      - mongodb
+      mongodb:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
 
   # -------------------- NOTIFICATION SERVICE --------------------
 
@@ -133,8 +153,10 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
-      - rabbitmq
-      - auth-service
+      rabbitmq:
+        condition: service_started
+      auth-service:
+        condition: service_started
 
 # -------------------- VOLUMES --------------------
 

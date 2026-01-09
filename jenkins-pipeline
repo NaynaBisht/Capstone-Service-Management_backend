@@ -1,0 +1,49 @@
+pipeline {
+    agent any
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/NaynaBisht/Capstone-Service-Management_backend.git'
+                  bat "mvn package"
+            }
+        }
+        stage('Build SONAR CUBE') {
+            steps {
+                bat """
+                    mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent verify org.jacoco:jacoco-maven-plugin:report org.sonarsource.scanner.maven:sonar-maven-plugin:sonar ^
+                      -Dsonar.token=614af203b250089cb3833b7466a62507dfb23b45 ^
+                      -Dsonar.projectKey=NaynaBisht_Capstone-Service-Management_backend ^
+                      -Dsonar.organization=naynabisht ^
+                      -Dsonar.host.url=https://sonarcloud.io ^
+                      -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+                """
+            }
+        }
+        stage('Cleanup Old Containers'){
+            steps {
+                echo 'Cleaning up old containers...'
+                // This stops and removes the containers so the names are free
+                // The '|| exit 0' ensures the build doesn't fail if there's nothing to stop
+                bat "docker compose down || exit 0"
+            }
+        }
+        stage('Build docker images') {
+            steps {
+                echo 'Building the specified branch...'
+                bat "docker build ./eureka-server"
+                bat "docker build ./api-gateway"
+                bat "docker build ./auth-service"
+                bat "docker build ./booking-service"
+                bat "docker build ./assignment-service"
+                bat "docker build ./technician-service"
+                bat "docker build ./service-management-service"
+                bat "docker build ./notification-service"
+            }
+        }
+        stage('Deploy images'){
+            steps {
+                bat "docker compose up -d" 
+            }
+        }
+    }
+}
