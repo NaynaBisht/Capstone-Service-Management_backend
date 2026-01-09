@@ -53,8 +53,7 @@ class AdminAssignmentControllerTest {
         CreateAssignmentRequest request = new CreateAssignmentRequest();
         request.setBookingId("B1");
         request.setTechnicianId("T1");
-        // FIX: Add these fields to pass validation
-        request.setServiceId("S1"); 
+        request.setCategoryId("C1");
         request.setTimeSlot("10:00 AM - 12:00 PM");
         request.setScheduledDate(LocalDate.now()); 
 

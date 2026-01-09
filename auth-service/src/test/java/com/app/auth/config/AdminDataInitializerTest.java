@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 
@@ -27,9 +28,19 @@ class AdminDataInitializerTest {
 
     @Test
     void shouldCreateAdminWhenNotExists() throws Exception {
-        // Arrange: Repository returns empty
-        when(userRepository.findByEmail("admin@service.com")).thenReturn(Optional.empty());
-        when(passwordEncoder.encode(anyString())).thenReturn("hashed_pass");
+        // Arrange
+        when(userRepository.findByEmail("admin@service.com"))
+                .thenReturn(Optional.empty());
+
+        when(passwordEncoder.encode(anyString()))
+                .thenReturn("hashed_pass");
+
+        // Inject password property
+        ReflectionTestUtils.setField(
+                adminDataInitializer,
+                "defaultAdminPassword",
+                "Secure@123"
+        );
 
         // Act
         CommandLineRunner runner = adminDataInitializer.seedAdminUser();
@@ -41,8 +52,16 @@ class AdminDataInitializerTest {
 
     @Test
     void shouldNotCreateAdminWhenAlreadyExists() throws Exception {
-        // Arrange: Repository returns an existing user
-        when(userRepository.findByEmail("admin@service.com")).thenReturn(Optional.of(new User()));
+        // Arrange
+        when(userRepository.findByEmail("admin@service.com"))
+                .thenReturn(Optional.of(new User()));
+
+        // Inject password anyway (should not be used)
+        ReflectionTestUtils.setField(
+                adminDataInitializer,
+                "defaultAdminPassword",
+                "Secure@123"
+        );
 
         // Act
         CommandLineRunner runner = adminDataInitializer.seedAdminUser();

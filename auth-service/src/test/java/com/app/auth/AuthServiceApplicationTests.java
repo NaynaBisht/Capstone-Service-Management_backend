@@ -1,6 +1,7 @@
 package com.app.auth;
 
 import org.junit.jupiter.api.Test;
+
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(properties = {
@@ -12,5 +13,8 @@ class AuthServiceApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
+	@Test
+    void mainMethodRunsWithoutException() {
+		AuthServiceApplication.main(new String[] {});
+    }
 }

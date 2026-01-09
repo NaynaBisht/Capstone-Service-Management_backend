@@ -12,5 +12,9 @@ class ApiGatewayApplicationTests {
 	@Test
 	void contextLoads() {
 	}
+	@Test
+    void mainMethodRunsWithoutException() {
+        ApiGatewayApplication.main(new String[] {});
+    }
 
 }

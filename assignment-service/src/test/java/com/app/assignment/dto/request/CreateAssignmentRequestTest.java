@@ -26,7 +26,7 @@ class CreateAssignmentRequestTest {
     void testValidRequest() {
         CreateAssignmentRequest request = new CreateAssignmentRequest();
         request.setBookingId("B1");
-        request.setServiceId("S1");
+        request.setCategoryId("C1");
         request.setTechnicianId("T1");
         request.setScheduledDate(LocalDate.now());
         request.setTimeSlot("10AM-12PM");
@@ -49,7 +49,7 @@ class CreateAssignmentRequestTest {
     void testScheduledDateInPast_invalid() {
         CreateAssignmentRequest request = new CreateAssignmentRequest();
         request.setBookingId("B1");
-        request.setServiceId("S1");
+        request.setCategoryId("C1");
         request.setScheduledDate(LocalDate.now().minusDays(1));
         request.setTimeSlot("10AM-12PM");
 
@@ -62,13 +62,13 @@ class CreateAssignmentRequestTest {
     void testGettersAndSetters() {
         CreateAssignmentRequest request = new CreateAssignmentRequest();
         request.setBookingId("B1");
-        request.setServiceId("S1");
+        request.setCategoryId("C1");
         request.setTechnicianId("T1");
         request.setScheduledDate(LocalDate.now());
         request.setTimeSlot("9AM-11AM");
 
         assertEquals("B1", request.getBookingId());
-        assertEquals("S1", request.getServiceId());
+        assertEquals("C1", request.getCategoryId());
         assertEquals("T1", request.getTechnicianId());
         assertEquals("9AM-11AM", request.getTimeSlot());
     }

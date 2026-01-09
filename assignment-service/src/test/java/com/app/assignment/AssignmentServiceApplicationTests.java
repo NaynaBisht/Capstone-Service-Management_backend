@@ -13,5 +13,8 @@ class AssignmentServiceApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
+	@Test
+    void mainMethodRunsWithoutException() {
+		AssignmentServiceApplication.main(new String[] {});
+    }
 }
