@@ -1,7 +1,6 @@
 package com.app.technician.controller;
 
 import com.app.technician.model.AvailabilityStatus;
-import com.app.technician.model.SkillType;
 import com.app.technician.model.Technician;
 import com.app.technician.model.TechnicianStatus;
 import com.app.technician.repository.TechnicianRepository;
@@ -52,15 +51,15 @@ class InternalTechnicianControllerTest {
     @Test
     void testFindAvailableTechnician_Success() throws Exception {
         // Mock the custom repository query to return our technician
-        when(technicianRepository.findFirstByStatusAndAvailabilityAndSkillsContaining(
+        when(technicianRepository.findFirstByStatusAndAvailabilityAndSkillCategoryIdsContaining(
                 eq(TechnicianStatus.APPROVED),
                 eq(AvailabilityStatus.AVAILABLE),
-                eq(SkillType.PLUMBING) 
+                eq("CAT_PLUMBING") 
         )).thenReturn(Optional.of(technician));
 
         // Perform GET request
         mockMvc.perform(get("/internal/technicians/available")
-                        .param("serviceId", "PLUMBING"))
+                        .param("categoryId", "CAT_PLUMBING"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.technicianId").value("tech-123"))
                 .andExpect(jsonPath("$.userId").value("user-001"));
@@ -68,17 +67,15 @@ class InternalTechnicianControllerTest {
 
     @Test
     void testFindAvailableTechnician_NotFound() throws Exception {
-        // Mock the repository to return empty
-        when(technicianRepository.findFirstByStatusAndAvailabilityAndSkillsContaining(
+
+        when(technicianRepository.findFirstByStatusAndAvailabilityAndSkillCategoryIdsContaining(
                 any(), any(), any()
         )).thenReturn(Optional.empty());
 
-        // Expect 500 Internal Server Error because code throws RuntimeException
         mockMvc.perform(get("/internal/technicians/available")
-                        .param("serviceId", "PLUMBING"))
+                        .param("categoryId", "PLUMBING"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(result -> {
-                    // Optional: Verify the exception message
                     String message = result.getResolvedException().getMessage();
                     assert(message.contains("No available technician found"));
                 });

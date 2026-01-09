@@ -6,7 +6,6 @@ import com.app.technician.dto.request.UpdateAvailabilityRequest;
 import com.app.technician.dto.response.ApproveTechnicianResponse;
 import com.app.technician.dto.response.TechnicianOnboardResponse;
 import com.app.technician.model.AvailabilityStatus;
-import com.app.technician.model.SkillType;
 import com.app.technician.model.Technician;
 import com.app.technician.model.TechnicianStatus;
 import com.app.technician.repository.TechnicianRepository;
@@ -59,7 +58,7 @@ class TechnicianControllerTest {
                 .email("john@example.com")
                 .status(TechnicianStatus.APPROVED)
                 .availability(AvailabilityStatus.AVAILABLE)
-                .skills(List.of(SkillType.PLUMBING))
+                .skillCategoryIds(List.of("CAT_PLUMBING"))
                 .city("New York")
                 .experienceYears(5)
                 .build();
@@ -72,7 +71,7 @@ class TechnicianControllerTest {
         request.setEmail("john@example.com");
         request.setPhone("1234567890");
         request.setCity("New York");
-        request.setSkills(List.of(SkillType.PLUMBING));
+        request.setSkillCategoryIds(List.of("CAT_PLUMBING"));
         request.setExperienceYears(5);
 
         // Ensure your DTO has @NoArgsConstructor if you use 'new', 
@@ -166,17 +165,22 @@ class TechnicianControllerTest {
 
     @Test
     void testSearchTechnicians() throws Exception {
-        when(technicianService.searchTechnicians(SkillType.PLUMBING, "NY", AvailabilityStatus.AVAILABLE, TechnicianStatus.APPROVED))
-                .thenReturn(List.of(technician));
+        when(technicianService.searchTechnicians(
+                "CAT_PLUMBING",
+                "NY",
+                AvailabilityStatus.AVAILABLE,
+                TechnicianStatus.APPROVED))
+            .thenReturn(List.of(technician));
 
         mockMvc.perform(get("/api/technicians/search")
-                        .param("skill", "PLUMBING")
+                        .param("categoryId", "CAT_PLUMBING")
                         .param("city", "NY")
                         .param("availability", "AVAILABLE")
                         .param("status", "APPROVED"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
     }
+
 
     @Test
     void testGetByUserId() throws Exception {

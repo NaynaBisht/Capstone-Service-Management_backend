@@ -8,7 +8,6 @@ import com.app.technician.dto.request.TechnicianOnboardRequest;
 import com.app.technician.dto.response.ApproveTechnicianResponse;
 import com.app.technician.dto.response.TechnicianOnboardResponse;
 import com.app.technician.model.AvailabilityStatus;
-import com.app.technician.model.SkillType;
 import com.app.technician.model.Technician;
 import com.app.technician.model.TechnicianStatus;
 import com.app.technician.repository.TechnicianRepository;
@@ -54,7 +53,7 @@ class TechnicianServiceTest {
                 .status(TechnicianStatus.PENDING)
                 .availability(AvailabilityStatus.UNAVAILABLE)
                 .documents(new HashMap<>())
-                .skills(List.of(SkillType.PLUMBING))
+                .skillCategoryIds(List.of("CAT_PLUMBING"))
                 .build();
 
         onboardRequest = new TechnicianOnboardRequest();
@@ -62,7 +61,7 @@ class TechnicianServiceTest {
         onboardRequest.setEmail("john@example.com");
         onboardRequest.setPhone("1234567890");
         onboardRequest.setCity("New York");
-        onboardRequest.setSkills(List.of(SkillType.PLUMBING));
+        onboardRequest.setSkillCategoryIds(List.of("CAT_PLUMBING"));
         onboardRequest.setExperienceYears(5);
     }
 
@@ -239,17 +238,17 @@ class TechnicianServiceTest {
     @Test
     void testSearchTechnicians_WithSkillFilter() {
         Technician t1 = new Technician();
-        t1.setSkills(List.of(SkillType.PLUMBING));
+        t1.setSkillCategoryIds(List.of("CAT_PLUMBING"));
         
         Technician t2 = new Technician();
-        t2.setSkills(List.of(SkillType.ELECTRICAL));
+        t2.setSkillCategoryIds(List.of("CAT_ELECTRICAL"));
 
         when(technicianRepository.findByCityAndStatusAndAvailability(any(), any(), any()))
             .thenReturn(List.of(t1, t2));
 
         // Filter for PLUMBING
         List<Technician> result = technicianService.searchTechnicians(
-            SkillType.PLUMBING, "NY", AvailabilityStatus.AVAILABLE, TechnicianStatus.APPROVED
+            "CAT_PLUMBING", "NY", AvailabilityStatus.AVAILABLE, TechnicianStatus.APPROVED
         );
 
         assertEquals(1, result.size());
